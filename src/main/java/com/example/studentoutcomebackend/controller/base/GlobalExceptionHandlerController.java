@@ -43,6 +43,9 @@ public class GlobalExceptionHandlerController extends BaseController {
             // 主键冲突
             response.setCode(ResponseCodeEnum.CODE_601.getCode());
             response.setMsg(ResponseCodeEnum.CODE_601.getMsg());
+        } else if (e instanceof org.springframework.web.servlet.resource.NoResourceFoundException) {
+            response.setCode(550);
+            response.setMsg("接口未实现");
         } else {
             response.setCode(ResponseCodeEnum.CODE_500.getCode());
             response.setMsg(ResponseCodeEnum.CODE_500.getMsg());

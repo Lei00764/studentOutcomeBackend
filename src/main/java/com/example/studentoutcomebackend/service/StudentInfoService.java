@@ -1,9 +1,18 @@
 package com.example.studentoutcomebackend.service;
 
 
+import com.example.studentoutcomebackend.entity.StudentInfo;
+
 public interface StudentInfoService {
 
 
-    void login(String stu_id, String user_password);
+    void login(String userName, String password);
+
+    StudentInfo getCurrentUserInfo();
+
+    void logout();
+
+    void updateUserPassword(String oldPassword, String newPassword);
+
 
 }

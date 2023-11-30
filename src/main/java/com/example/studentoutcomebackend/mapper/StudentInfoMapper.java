@@ -15,4 +15,10 @@ public interface StudentInfoMapper {
     @Select("SELECT * FROM STUDENT_INFO WHERE stu_id=#{stu_id} AND user_password=#{user_password}")
     StudentInfo selectByStuIdAndPassword(@Param("stu_id") String stu_id, @Param("user_password") String user_password);
 
+    @Update({
+            "UPDATE STUDENT_INFO",
+            "SET user_password = #{newPassword}",
+            "WHERE user_id = #{userId} and user_password = #{oldPassword}"
+    })
+    int changeUserPassword(int userId, String oldPassword, String newPassword);
 }

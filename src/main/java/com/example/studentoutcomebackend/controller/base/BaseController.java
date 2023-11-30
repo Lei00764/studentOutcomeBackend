@@ -14,6 +14,10 @@ public class BaseController {
         return responseVO;
     }
 
+    protected <T> ResponseVO getSuccessResponseVO() {
+        return getSuccessResponseVO(null);
+    }
+
     protected <T> ResponseVO getBusinessErrorResponseVO(BusinessException e, T t) {
         ResponseVO vo = new ResponseVO();
         if (e.getCode() == null) {

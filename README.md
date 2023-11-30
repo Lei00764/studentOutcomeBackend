@@ -44,6 +44,8 @@ Service层 = Service接口 + ServiceImpl 实现类
 
 resources/mapper/xxx.xml 里面写动态 SQL
 
+*真写了吗*
+
 ## 快捷键
 
 去除无用的 import：`Ctrl + Alt + O`
