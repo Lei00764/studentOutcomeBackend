@@ -1,0 +1,14 @@
+server:
+  port: 7217
+
+spring:
+  datasource:
+    username: root
+    password: K#9pT!2aZ@5sW&8f9e0d7c6b5a4_3e2d1c
+    url: jdbc:mysql://100.64.151.47:3306/scholarship?serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 打印日志
