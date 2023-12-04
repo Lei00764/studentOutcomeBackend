@@ -19,11 +19,11 @@ public interface CompetitionService {
     /**
      * 根据 competitionId 查看竞赛届别
      */
-    List<Map<String, Object>> selectTermByCompetitionId(int competitionId);
+    Map<String, Object> selectTermByCompetitionId(int competitionId);
 
     /**
      * 根据 termId 查询竞赛奖项名称和含金量
      */
-    List<Map<String, Object>> selectPrizeInfoByTermId(int termId);
+    Map<String, Object> selectPrizeInfoByTermId(int termId);
 
 }

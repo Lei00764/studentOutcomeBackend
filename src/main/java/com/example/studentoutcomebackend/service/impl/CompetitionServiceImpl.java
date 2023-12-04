@@ -55,7 +55,7 @@ public class CompetitionServiceImpl implements CompetitionService {
      */
     @Override
     @Transactional
-    public List<Map<String, Object>> selectTermByCompetitionId(int competitionId) {
+    public Map<String, Object> selectTermByCompetitionId(int competitionId) {
         List<Map<String, Object>> termInfoList = competitionMapper.selectTermInfoByCompetitionId(competitionId);
 
         Map<String, Object> competitionInfo = competitionMapper.selectCompetitionInfoByCompetitionId(competitionId);
@@ -80,7 +80,10 @@ public class CompetitionServiceImpl implements CompetitionService {
             CompetitionInfoList.add(CompetitionInfo);
         }
 
-        return CompetitionInfoList;
+        Map<String, Object> result = new HashMap<>();
+        result.put("terms", CompetitionInfoList);
+
+        return result;
     }
 
     /**
@@ -88,10 +91,13 @@ public class CompetitionServiceImpl implements CompetitionService {
      */
     @Override
     @Transactional
-    public List<Map<String, Object>> selectPrizeInfoByTermId(int termId) {
+    public Map<String, Object> selectPrizeInfoByTermId(int termId) {
         List<Map<String, Object>> prizeInfoList = competitionMapper.selectPrizeInfoByTermId(termId);
 
-        return prizeInfoList;
+        Map<String, Object> result = new HashMap<>();
+        result.put("prizes", prizeInfoList);
+
+        return result;
     }
 
 }

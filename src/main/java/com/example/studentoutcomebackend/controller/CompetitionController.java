@@ -51,7 +51,7 @@ public class CompetitionController extends BaseController {
         int competitionId = (int) requestMap.get("competition_id");
 
         // 根据 competitionId 查看竞赛届别
-        List<Map<String, Object>> CompetitionInfoList = competitionService.selectTermByCompetitionId(competitionId);
+        Map<String, Object> CompetitionInfoList = competitionService.selectTermByCompetitionId(competitionId);
 
         return getSuccessResponseVO(CompetitionInfoList);
     }
@@ -66,7 +66,7 @@ public class CompetitionController extends BaseController {
     public ResponseVO termPrize(@RequestBody Map<String, Object> requestMap) {
         int termId = (int) requestMap.get("term_id");
 
-        List<Map<String, Object>> termPrizeInfo = competitionService.selectPrizeInfoByTermId(termId);  // 根据 termId 查看竞赛奖项名称和含金量
+        Map<String, Object> termPrizeInfo = competitionService.selectPrizeInfoByTermId(termId);  // 根据 termId 查看竞赛奖项名称和含金量
         return getSuccessResponseVO(termPrizeInfo);
     }
 
