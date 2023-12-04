@@ -5,13 +5,10 @@
     <select id="selectCompetitionInfoByKeyword" resultType="java.util.Map">
         SELECT c.id,
                c.competition_name,
-               ct.type_name,
-               term.organizer
+               ct.type_name
         FROM COMPETITION c
                  LEFT JOIN
              COMPETITION_TYPE ct ON c.type_id = ct.id
-                 LEFT JOIN
-             COMPETITION_TERM term ON c.id = term.competition_id
         WHERE c.competition_name LIKE CONCAT('%', #{keyword}, '%')
     </select>
 
