@@ -67,4 +67,10 @@ public interface CompetitionMapper {
      */
     @Insert("INSERT INTO COMPETITION_TEAM_STUDENT (team_id, student_id, contribution_order) VALUES (#{teamId}, #{studentId}, 0)")
     void insertTeamStudent(int teamId, int studentId);
+
+    /**
+     * 在 COMPETITION_LEVEL 表中，通过 levelId 查 levelName
+     */
+    @Select("SELECT level_name FROM COMPETITION_LEVEL WHERE id = #{levelId}")
+    String selectLevelNameByLevelId(int levelId);
 }

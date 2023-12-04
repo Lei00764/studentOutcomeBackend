@@ -75,6 +75,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         String typeName = competitionMapper.selectTypeNameByTypeId(typeId);
 
+
         List<Map<String, Object>> CompetitionInfoList = new ArrayList<>();
 
         for (Map<String, Object> termInfo : termInfoList) {
@@ -82,10 +83,10 @@ public class CompetitionServiceImpl implements CompetitionService {
 
             CompetitionInfo.put("competition_name", competitionName);
             CompetitionInfo.put("type_name", typeName);
-
             CompetitionInfo.put("id", termInfo.get("id"));
             CompetitionInfo.put("term_name", termInfo.get("term_name"));
-            CompetitionInfo.put("level_id", termInfo.get("level_id"));
+            String levelName = competitionMapper.selectLevelNameByLevelId((int) termInfo.get("level_id"));
+            CompetitionInfo.put("level_name", levelName);
             CompetitionInfo.put("organizer", termInfo.get("organizer"));
 
             CompetitionInfoList.add(CompetitionInfo);
