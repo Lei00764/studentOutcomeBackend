@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,10 +18,12 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Autowired
     PermissionMapper permissionMapper;
+
     @Autowired
     private HttpServletRequest request;
 
     @Override
+    @Transactional
     public boolean checkPermission(int userId, String permissionName) {
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
@@ -32,22 +35,24 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    @Transactional
     public boolean checkPermission(String permissionName) {
         HttpSession session = request.getSession(true);
-        StudentInfo completeStudent = (StudentInfo)session.getAttribute("stuInfo");
-        if(completeStudent==null){
+        StudentInfo completeStudent = (StudentInfo) session.getAttribute("stuInfo");
+        if (completeStudent == null) {
             // 没登陆，使用默认权限
             return checkPermission(-1, permissionName);
-        }else{
+        } else {
             return checkPermission(completeStudent.getUser_id(), permissionName);
         }
     }
 
     @Override
+    @Transactional
     public void throwIfDontHave(int userId, String permissionName, String hint) {
         boolean ans = checkPermission(userId, permissionName);
-        if(!ans){
-            if(hint == null){
+        if (!ans) {
+            if (hint == null) {
                 hint = "请求被拒绝：无" + permissionName + "权限！";
             }
             throw new BusinessException(403, hint);
@@ -55,13 +60,15 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
+    @Transactional
     public void throwIfDontHave(String permissionName, String hint) {
         boolean ans = checkPermission(permissionName);
-        if(!ans){
-            if(hint == null){
+        if (!ans) {
+            if (hint == null) {
                 hint = "请求被拒绝：无" + permissionName + "权限！";
             }
             throw new BusinessException(403, hint);
         }
     }
+
 }

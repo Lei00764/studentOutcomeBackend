@@ -18,32 +18,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/StudentInfo")
+@RequestMapping("api/studentInfo")
 public class StudentInfoController extends BaseController {
 
     @Autowired
     private StudentInfoService studentInfoService;
 
-    @RequestMapping("/login")
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseVO login(@RequestBody Map<String, Object> requestMap) {
         String username = (String) requestMap.get("username");
         String password = (String) requestMap.get("password");
 
-
         if (username == null || password == null) {
             throw new BusinessException("请求参数错误");  // 抛异常
         }
-
-        // TODO（若有）校验验证码
 
         // 校验账号密码
         studentInfoService.login(username, password);
         return getSuccessResponseVO();
     }
 
-    @RequestMapping(value="/info", method = RequestMethod.GET)
-    public ResponseVO getCurrentUserInfo(){
-        StudentInfo studentInfo =  studentInfoService.getCurrentUserInfo();
+    @RequestMapping(value = "/info", method = RequestMethod.GET)
+    public ResponseVO getCurrentUserInfo() {
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
         Map<String, Object> resObj = new HashMap<>();
         resObj.put("stu_id", studentInfo.getStu_id());
         resObj.put("stu_name", studentInfo.getStu_name());
@@ -54,14 +51,14 @@ public class StudentInfoController extends BaseController {
         return getSuccessResponseVO(resObj);
     }
 
-    @RequestMapping(value="/logout", method = RequestMethod.GET)
-    public ResponseVO userLogout(){
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public ResponseVO userLogout() {
         studentInfoService.logout();
         return getSuccessResponseVO();
     }
 
-    @RequestMapping(value="/updatePasswordStudent", method = RequestMethod.POST)
-    public ResponseVO updateUserPassword(@RequestBody Map<String, Object> requestMap){
+    @RequestMapping(value = "/changePasswordStudent", method = RequestMethod.POST)
+    public ResponseVO updateUserPassword(@RequestBody Map<String, Object> requestMap) {
         String newPassword = (String) requestMap.get("new_password");
         String oldPassword = (String) requestMap.get("old_password");
 
@@ -69,7 +66,8 @@ public class StudentInfoController extends BaseController {
             throw new BusinessException("请求参数错误");  // 抛异常
         }
 
-        studentInfoService.updateUserPassword(oldPassword, newPassword);
+        studentInfoService.changeUserPassword(oldPassword, newPassword);
         return getSuccessResponseVO();
     }
+
 }

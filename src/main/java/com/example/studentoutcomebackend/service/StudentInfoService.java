@@ -5,14 +5,12 @@ import com.example.studentoutcomebackend.entity.StudentInfo;
 
 public interface StudentInfoService {
 
-
     void login(String userName, String password);
 
     StudentInfo getCurrentUserInfo();
 
     void logout();
 
-    void updateUserPassword(String oldPassword, String newPassword);
-
+    void changeUserPassword(String oldPassword, String newPassword);
 
 }
