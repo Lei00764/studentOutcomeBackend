@@ -73,4 +73,5 @@ public interface CompetitionMapper {
      */
     @Select("SELECT level_name FROM COMPETITION_LEVEL WHERE id = #{levelId}")
     String selectLevelNameByLevelId(int levelId);
+    
 }

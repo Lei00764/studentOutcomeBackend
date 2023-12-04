@@ -30,7 +30,7 @@ public class CompetitionController extends BaseController {
         int termId = (int) requestMap.get("term_id");
         int prizeId = (int) requestMap.get("prize_id");
         String awardDate = (String) requestMap.get("award_date");
-        String description = (String) requestMap.get("description");
+        String description = (String) requestMap.get("desc");
 
         // 校验 competitionId, termId, prizeId 是否对应
         competitionService.checkCompetition(competitionId, termId, prizeId);
