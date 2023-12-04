@@ -1,10 +1,13 @@
 package com.example.studentoutcomebackend.service.impl;
 
 import com.example.studentoutcomebackend.entity.Competition.Competition;
+import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.service.CompetitionService;
+import com.example.studentoutcomebackend.service.StudentInfoService;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,9 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Resource
     CompetitionMapper competitionMapper;
+
+    @Autowired
+    StudentInfoService studentInfoService;
 
     @Override
     @Transactional
@@ -45,7 +51,12 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public void createNewTeam(int competitionId, int termId, int prizeId, String awardDate, String description) {
+        // 创建一个新的队伍
         competitionMapper.insertCompetitionTeam(competitionId, termId, prizeId, awardDate, description);
+
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        // 创建 TEAM-STUDENT 记录
+        competitionMapper.insertTeamStudent(termId, (int) studentInfo.getUser_id());
     }
 
     /**
@@ -96,6 +107,23 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         Map<String, Object> result = new HashMap<>();
         result.put("prizes", prizeInfoList);
+
+        return result;
+    }
+
+    /**
+     * 根据 关键字 查询竞赛信息
+     *
+     * @param keyword
+     * @return
+     */
+    @Override
+    @Transactional
+    public Map<String, Object> selectCompetitionInfoByKeyword(String keyword) {
+        List<Map<String, Object>> competitionInfoList = competitionMapper.selectCompetitionInfoByKeyword(keyword);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("competitions", competitionInfoList);
 
         return result;
     }

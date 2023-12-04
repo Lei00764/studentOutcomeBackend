@@ -84,4 +84,18 @@ public class CompetitionController extends BaseController {
         return getSuccessResponseVO();
     }
 
+    /**
+     * 根据 关键字 查询竞赛信息
+     *
+     * @param requestMap
+     * @return
+     */
+    @RequestMapping("queryCompetition")
+    public ResponseVO queryCompetition(@RequestBody Map<String, Object> requestMap) {
+        String keyword = (String) requestMap.get("keyword");
+
+        // 根据 关键字 查询竞赛信息
+        Map<String, Object> competitionInfo = competitionService.selectCompetitionInfoByKeyword(keyword);
+        return getSuccessResponseVO(competitionInfo);
+    }
 }

@@ -3,6 +3,7 @@ package com.example.studentoutcomebackend.mapper;
 import com.example.studentoutcomebackend.entity.Competition.Competition;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.MapKey;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -55,4 +56,15 @@ public interface CompetitionMapper {
     @Select("SELECT id, prize_name, prize_order FROM COMPETITION_PRIZE WHERE term_id = #{termId}")
     List<Map<String, Object>> selectPrizeInfoByTermId(int termId);
 
+    /**
+     * 在 COMPETITION 表中，通过关键字查找竞赛信息
+     */
+    @MapKey("id")
+    List<Map<String, Object>> selectCompetitionInfoByKeyword(String keyword);
+
+    /**
+     * 在 COMPETITION_TEAM_STUDENT 表中，插入 teamId 和 studentId
+     */
+    @Insert("INSERT INTO COMPETITION_TEAM_STUDENT (team_id, student_id, contribution_order) VALUES (#{teamId}, #{studentId}, 0)")
+    void insertTeamStudent(int teamId, int studentId);
 }

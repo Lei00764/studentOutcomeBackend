@@ -29,10 +29,6 @@ public class StudentInfoController extends BaseController {
         String username = (String) requestMap.get("username");
         String password = (String) requestMap.get("password");
 
-        if (username == null || password == null) {
-            throw new BusinessException("请求参数错误");  // 抛异常
-        }
-
         // 校验账号密码
         studentInfoService.login(username, password);
         return getSuccessResponseVO();
@@ -61,10 +57,6 @@ public class StudentInfoController extends BaseController {
     public ResponseVO updateUserPassword(@RequestBody Map<String, Object> requestMap) {
         String newPassword = (String) requestMap.get("new_password");
         String oldPassword = (String) requestMap.get("old_password");
-
-        if (newPassword == null || oldPassword == null) {
-            throw new BusinessException("请求参数错误");  // 抛异常
-        }
 
         studentInfoService.changeUserPassword(oldPassword, newPassword);
         return getSuccessResponseVO();

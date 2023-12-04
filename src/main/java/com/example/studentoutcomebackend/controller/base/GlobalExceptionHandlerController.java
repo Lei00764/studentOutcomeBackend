@@ -46,6 +46,9 @@ public class GlobalExceptionHandlerController extends BaseController {
         } else if (e instanceof org.springframework.web.servlet.resource.NoResourceFoundException) {
             response.setCode(550);
             response.setMsg("接口未实现");
+        } else if (e instanceof org.springframework.http.converter.HttpMessageNotReadableException) {
+            response.setCode(ResponseCodeEnum.CODE_600.getCode());
+            response.setMsg(ResponseCodeEnum.CODE_600.getMsg());
         } else {
             response.setCode(ResponseCodeEnum.CODE_500.getCode());
             response.setMsg(ResponseCodeEnum.CODE_500.getMsg());

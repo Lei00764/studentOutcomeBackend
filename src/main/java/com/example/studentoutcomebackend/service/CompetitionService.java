@@ -9,8 +9,7 @@ public interface CompetitionService {
      * 检查 competitionId, termId, prizeId 是否对应
      */
     void checkCompetition(int competitionId, int termId, int prizeId);
-
-
+    
     /**
      * 创建一个新的队伍
      */
@@ -25,5 +24,10 @@ public interface CompetitionService {
      * 根据 termId 查询竞赛奖项名称和含金量
      */
     Map<String, Object> selectPrizeInfoByTermId(int termId);
+
+    /**
+     * 根据 关键字 查询竞赛信息
+     */
+    Map<String, Object> selectCompetitionInfoByKeyword(String keyword);
 
 }

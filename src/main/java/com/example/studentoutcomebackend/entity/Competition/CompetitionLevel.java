@@ -7,6 +7,6 @@ public class CompetitionLevel {
 
     private int id;
 
-    private String name;
+    private String level_name;
 
 }

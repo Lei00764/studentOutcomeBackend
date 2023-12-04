@@ -13,6 +13,6 @@ public class CompetitionTerm {
 
     private int level_id;  // 赛事的等级 id，每届可能不一样
 
-    private String organizer;
+    private String organizer;  // 同一赛事的组织者，每届可能不一样
 
 }
