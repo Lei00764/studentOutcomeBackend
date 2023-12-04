@@ -1,6 +1,5 @@
 package com.example.studentoutcomebackend.service.impl;
 
-import com.example.studentoutcomebackend.entity.Competition.Competition;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +48,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     @Transactional
-    public void createNewTeam(int competitionId, int termId, int prizeId, String awardDate, String description) {
+    public int createNewTeam(int competitionId, int termId, int prizeId, String awardDate, String description) {
         Map<String, Object> params = new HashMap<>();
         StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
         int creatorId = studentInfo.getUser_id();
@@ -66,6 +64,10 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         // 创建一个新的队伍
         competitionMapper.insertCompetitionTeam(params);
+        if((Integer) params.get("resultCode") != 0){
+            throw new BusinessException(630, "您已经填报了本届比赛的参赛信息，无需重复填报");
+        }
+        return (int) params.get("newTeamId");
     }
 
     /**
@@ -136,6 +138,21 @@ public class CompetitionServiceImpl implements CompetitionService {
         result.put("competitions", competitionInfoList);
 
         return result;
+    }
+
+    @Override
+    @Transactional
+    public List<Map<String, Object>> selectTeamByNothing(int pageNo){
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+        return competitionMapper.selectTeamByNothing(userId, (pageNo-1)*20);
+    }
+
+    @Override
+    public int selectTeamCountByNothing() {
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+        return competitionMapper.selectTeamCountByNothing(userId);
     }
 
 }

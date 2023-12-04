@@ -1,5 +1,7 @@
 package com.example.studentoutcomebackend.service;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +14,10 @@ public interface CompetitionService {
     
     /**
      * 创建一个新的队伍
+     *
+     * @return 创建的新队伍的teamId
      */
-    void createNewTeam(int competitionId, int termId, int prizeId, String awardDate, String description);
+    int createNewTeam(int competitionId, int termId, int prizeId, String awardDate, String description);
 
     /**
      * 根据 competitionId 查看竞赛届别
@@ -30,4 +34,8 @@ public interface CompetitionService {
      */
     Map<String, Object> selectCompetitionInfoByKeyword(String keyword);
 
+    @Transactional
+    List<Map<String, Object>> selectTeamByNothing(int pageNo);
+
+    int selectTeamCountByNothing();
 }

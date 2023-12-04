@@ -12,4 +12,28 @@
         WHERE c.competition_name LIKE CONCAT('%', #{keyword}, '%')
     </select>
 
+    <select id="selectTeamByNothing" resultType="java.util.Map">
+        select COMPETITION_TEAM.id as team_id,
+               COMPETITION.competition_name as competition_name,
+               COMPETITION_TERM.term_name as competition_term_name,
+               COMPETITION_PRIZE.prize_name as prize_name,
+               COMPETITION_TEAM.verify_status as status_code
+        from
+            COMPETITION_TEAM_STUDENT
+                join COMPETITION_TEAM on COMPETITION_TEAM_STUDENT.user_id=#{userId}
+                    and COMPETITION_TEAM_STUDENT.team_id = COMPETITION_TEAM.id
+                join COMPETITION on competition_id=COMPETITION.id
+                join COMPETITION_TERM on term_id=COMPETITION_TERM.id
+                join COMPETITION_PRIZE on prize_id=COMPETITION_PRIZE.id
+        LIMIT 20 OFFSET #{offset}
+    </select>
+
+    <select id="selectTeamCountByNothing" resultType="java.lang.Integer">
+        select count(*)
+        from
+            COMPETITION_TEAM_STUDENT
+                join COMPETITION_TEAM on COMPETITION_TEAM_STUDENT.user_id=#{userId}
+                and COMPETITION_TEAM_STUDENT.team_id = COMPETITION_TEAM.id
+    </select>
+
 </mapper>

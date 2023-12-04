@@ -6,12 +6,22 @@ import org.apache.ibatis.mapping.StatementType;
 import java.util.List;
 import java.util.Map;
 
+@Mapper
 public interface CompetitionMapper {
 
     /**
-     * 创建队伍基本信息
+     * 通过调用CreateTeamRecord创建队伍基本信息。如果成功创建，resultCode=0，newTeamId为新创建的记录的id
+     * 如果不成功，resultCode=1，说明已经有记录了，此时newTeamId为原有的记录的id
      */
-    @Select("{call CreateTeamRecord(# { creatorId, jdbcType = INTEGER, mode = IN }, # { competitionId, jdbcType = INTEGER, mode = IN }, # { termId, jdbcType = INTEGER, mode = IN }, # { prizeId, jdbcType = INTEGER, mode = IN }, # { awardDate, jdbcType = VARCHAR, mode = IN }, # { certDescription, jdbcType = VARCHAR, mode = IN }, # { resultCode, jdbcType = INTEGER, mode = OUT }, # { newTeamId, jdbcType = INTEGER, mode = OUT })}")
+    @Select("{call CreateTeamRecord(" +
+            "#{creatorId,jdbcType=INTEGER,mode=IN}," +
+            "#{competitionId,jdbcType=INTEGER,mode=IN}," +
+            "#{termId,jdbcType=INTEGER,mode=IN}," +
+            "#{prizeId,jdbcType=INTEGER,mode=IN}," +
+            "#{awardDate,jdbcType=VARCHAR,mode=IN}," +
+            "#{certDescription,jdbcType=VARCHAR,mode=IN}," +
+            "#{resultCode,jdbcType=INTEGER,mode=OUT}," +
+            "#{newTeamId,jdbcType=INTEGER,mode=OUT})}")
     @Options(statementType = StatementType.CALLABLE)
     void insertCompetitionTeam(Map<String, Object> params);
 
@@ -68,5 +78,20 @@ public interface CompetitionMapper {
      */
     @Select("SELECT level_name FROM COMPETITION_LEVEL WHERE id = #{levelId}")
     String selectLevelNameByLevelId(int levelId);
+
+    /**
+     * 不使用任何条件查询学生加入的参赛队伍
+     * @param userId 用户id
+     * @param offset 偏移量（(页号-1)*20）
+     * @return
+     */
+    List<Map<String,Object>> selectTeamByNothing(int userId, int offset);
+
+    /**
+     * 不使用任何条件查询学生加入的参赛队伍数量
+     * @param userId 用户id
+     * @return
+     */
+    int selectTeamCountByNothing(int userId);
 
 }
