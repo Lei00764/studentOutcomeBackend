@@ -30,6 +30,11 @@ public interface CompetitionService {
     Map<String, Object> selectPrizeInfoByTermId(int termId);
 
     /**
+     * 根据 teamId 查询该队伍的全部信息
+     */
+    Map<String, Object> selectTeamInfoByTeamId(int teamId);
+
+    /**
      * 根据 关键字 查询竞赛信息
      */
     Map<String, Object> selectCompetitionInfoByKeyword(String keyword);

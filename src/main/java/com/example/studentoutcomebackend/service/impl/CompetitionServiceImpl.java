@@ -124,6 +124,39 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     /**
+     * 根据 teamId 查询该队伍的全部信息
+     */
+    @Override
+    @Transactional
+    public Map<String, Object> selectTeamInfoByTeamId(int teamId) {
+        Map<String, Object> teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+
+        if (teamInfo == null) {
+            throw new BusinessException(601, "队伍不存在");
+        }
+
+        Map<String, Object> result = new HashMap<>();
+
+        Map<String, Object> competitionInfo = new HashMap<>();
+        Map<String, Object> termInfo = new HashMap<>();
+        Map<String, Object> prizeInfo = new HashMap<>();
+        List<Map<String, Object>> membersInfo = new ArrayList<>();
+        List<Map<String, Object>> logsInfo = new ArrayList<>();
+
+        result.put("status", teamInfo.get("verify_status"));
+        result.put("award_date", teamInfo.get("award_date"));
+        result.put("certification_img_url", teamInfo.get("image_id"));
+        result.put("desc", teamInfo.get("description"));
+        result.put("competition", competitionInfo);
+        result.put("term", termInfo);
+        result.put("prize", prizeInfo);
+        result.put("members", membersInfo);
+        result.put("logs", logsInfo);
+        
+        return result;
+    }
+
+    /**
      * 根据 关键字 查询竞赛信息
      *
      * @param keyword
@@ -193,6 +226,6 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public void clearCertification(int teamId) {
-        competitionMapper.updateTeamImage(teamId, 0);
+        competitionMapper.updateTeamImage(teamId, null);
     }
 }

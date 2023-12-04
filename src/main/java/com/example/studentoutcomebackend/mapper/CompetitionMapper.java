@@ -113,5 +113,5 @@ public interface CompetitionMapper {
      * 在 COMPETITION_TEAM 表中，将 image_id 字段置为 imageId
      */
     @Update("UPDATE COMPETITION_TEAM SET image_id = #{imageId} WHERE id = #{teamId}")
-    void updateTeamImage(int teamId, int imageId);
+    void updateTeamImage(int teamId, String imageId);
 }

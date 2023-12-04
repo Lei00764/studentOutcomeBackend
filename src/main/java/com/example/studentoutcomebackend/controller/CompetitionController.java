@@ -103,10 +103,9 @@ public class CompetitionController extends BaseController {
     public ResponseVO getTeamInfo(@RequestBody Map<String, Object> requestMap) {
         try {
             int teamId = (int) requestMap.get("team_id");
-            Map<String, Object> resMap = new HashMap<>();
-            resMap.put("team_id", teamId);
+            Map<String, Object> TeamInfo = competitionService.selectTeamInfoByTeamId(teamId);
 
-            return getSuccessResponseVO(resMap);
+            return getSuccessResponseVO(TeamInfo);
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
         }
