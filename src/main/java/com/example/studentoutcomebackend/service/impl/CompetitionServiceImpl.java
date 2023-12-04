@@ -51,12 +51,21 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public void createNewTeam(int competitionId, int termId, int prizeId, String awardDate, String description) {
-        // 创建一个新的队伍
-        competitionMapper.insertCompetitionTeam(competitionId, termId, prizeId, awardDate, description);
-
+        Map<String, Object> params = new HashMap<>();
         StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
-        // 创建 TEAM-STUDENT 记录
-        competitionMapper.insertTeamStudent(termId, (int) studentInfo.getUser_id());
+        int creatorId = studentInfo.getUser_id();
+
+        params.put("creatorId", creatorId);
+        params.put("competitionId", competitionId);
+        params.put("termId", termId);
+        params.put("prizeId", prizeId);
+        params.put("awardDate", awardDate);
+        params.put("certDescription", description);
+        params.put("resultCode", 0);
+        params.put("newTeamId", 0);
+
+        // 创建一个新的队伍
+        competitionMapper.insertCompetitionTeam(params);
     }
 
     /**

@@ -1,10 +1,7 @@
 package com.example.studentoutcomebackend.mapper;
 
-import com.example.studentoutcomebackend.entity.Competition.Competition;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.MapKey;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.mapping.StatementType;
 
 import java.util.List;
 import java.util.Map;
@@ -14,10 +11,9 @@ public interface CompetitionMapper {
     /**
      * 创建队伍基本信息
      */
-    @Insert("INSERT INTO COMPETITION_TEAM (competition_id, term_id, prize_id, award_date, description) " +
-            "VALUES (#{competitionId}, #{termId}, #{prizeId}, #{awardDate}, #{description})")
-    void insertCompetitionTeam(int competitionId, int termId, int prizeId, String awardDate, String description);
-
+    @Select("{call CreateTeamRecord(# { creatorId, jdbcType = INTEGER, mode = IN }, # { competitionId, jdbcType = INTEGER, mode = IN }, # { termId, jdbcType = INTEGER, mode = IN }, # { prizeId, jdbcType = INTEGER, mode = IN }, # { awardDate, jdbcType = VARCHAR, mode = IN }, # { certDescription, jdbcType = VARCHAR, mode = IN }, # { resultCode, jdbcType = INTEGER, mode = OUT }, # { newTeamId, jdbcType = INTEGER, mode = OUT })}")
+    @Options(statementType = StatementType.CALLABLE)
+    void insertCompetitionTeam(Map<String, Object> params);
 
     /**
      * 在 COMPETITION 表，通过 competitionId 查 type_id 和 competition_name
@@ -49,7 +45,6 @@ public interface CompetitionMapper {
     @Select("SELECT id, term_name, level_id, organizer FROM COMPETITION_TERM WHERE competition_id = #{competitionId}")
     List<Map<String, Object>> selectTermInfoByCompetitionId(int competitionId);
 
-
     /**
      * 在 COMPETITION_PRIZE 表中，通过 termId 查 prizeId, prizeName, prizeOrder
      */
@@ -73,5 +68,5 @@ public interface CompetitionMapper {
      */
     @Select("SELECT level_name FROM COMPETITION_LEVEL WHERE id = #{levelId}")
     String selectLevelNameByLevelId(int levelId);
-    
+
 }
