@@ -64,7 +64,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         // 创建一个新的队伍
         competitionMapper.insertCompetitionTeam(params);
-        if((Integer) params.get("resultCode") != 0){
+        if ((Integer) params.get("resultCode") != 0) {
             throw new BusinessException(630, "您已经填报了本届比赛的参赛信息，无需重复填报");
         }
         return (int) params.get("newTeamId");
@@ -84,7 +84,7 @@ public class CompetitionServiceImpl implements CompetitionService {
         String competitionName = (String) competitionInfo.get("competition_name");
         int typeId = (int) competitionInfo.get("type_id");
 
-        String typeName = competitionMapper.selectTypeNameByTypeId(typeId);
+        String typeName = competitionMapper.selectTypeInfoByTypeId(typeId).get("type_name").toString();
 
 
         List<Map<String, Object>> CompetitionInfoList = new ArrayList<>();
@@ -142,10 +142,10 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     @Transactional
-    public List<Map<String, Object>> selectTeamByNothing(int pageNo){
+    public List<Map<String, Object>> selectTeamByNothing(int pageNo) {
         StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
         int userId = studentInfo.getUser_id();
-        return competitionMapper.selectTeamByNothing(userId, (pageNo-1)*20);
+        return competitionMapper.selectTeamByNothing(userId, (pageNo - 1) * 20);
     }
 
     @Override
@@ -155,4 +155,44 @@ public class CompetitionServiceImpl implements CompetitionService {
         return competitionMapper.selectTeamCountByNothing(userId);
     }
 
+    /**
+     * 检查队伍是否存在
+     */
+    @Override
+    @Transactional
+    public void checkTeamExist(int teamId) {
+        Map<String, Object> teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        if (teamInfo == null) {
+            throw new BusinessException(601, "队伍不存在");
+        }
+    }
+
+    /**
+     * 提交审核
+     */
+    @Override
+    @Transactional
+    public void submitToReview(int teamId) {
+        competitionMapper.updateTeamStatus(teamId, 1);
+    }
+
+    /**
+     * 撤回审核申请，回到“草稿”阶段
+     */
+    @Override
+    @Transactional
+    public void withdrawTeam(int teamId) {
+        competitionMapper.updateTeamStatus(teamId, 0);
+    }
+
+    /**
+     * 清空证书图片
+     *
+     * @param teamId
+     */
+    @Override
+    @Transactional
+    public void clearCertification(int teamId) {
+        competitionMapper.updateTeamImage(teamId, 0);
+    }
 }

@@ -11,7 +11,7 @@ public interface CompetitionService {
      * 检查 competitionId, termId, prizeId 是否对应
      */
     void checkCompetition(int competitionId, int termId, int prizeId);
-    
+
     /**
      * 创建一个新的队伍
      *
@@ -38,4 +38,24 @@ public interface CompetitionService {
     List<Map<String, Object>> selectTeamByNothing(int pageNo);
 
     int selectTeamCountByNothing();
+
+    /**
+     * 检查队伍是否存在
+     */
+    void checkTeamExist(int teamId);
+
+    /**
+     * 提交审核
+     */
+    void submitToReview(int teamId);
+
+    /**
+     * 撤回审核申请
+     */
+    void withdrawTeam(int teamId);
+
+    /**
+     * 清除证书图片
+     */
+    void clearCertification(int teamId);
 }

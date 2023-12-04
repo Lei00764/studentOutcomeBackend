@@ -26,12 +26,16 @@ public class StudentInfoController extends BaseController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseVO login(@RequestBody Map<String, Object> requestMap) {
-        String username = (String) requestMap.get("username");
-        String password = (String) requestMap.get("password");
+        try {
+            String username = (String) requestMap.get("username");
+            String password = (String) requestMap.get("password");
 
-        // 校验账号密码
-        studentInfoService.login(username, password);
-        return getSuccessResponseVO();
+            // 校验账号密码
+            studentInfoService.login(username, password);
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
     }
 
     @RequestMapping(value = "/info", method = RequestMethod.GET)
@@ -55,11 +59,15 @@ public class StudentInfoController extends BaseController {
 
     @RequestMapping(value = "/changePasswordStudent", method = RequestMethod.POST)
     public ResponseVO updateUserPassword(@RequestBody Map<String, Object> requestMap) {
-        String newPassword = (String) requestMap.get("new_password");
-        String oldPassword = (String) requestMap.get("old_password");
+        try {
+            String newPassword = (String) requestMap.get("new_password");
+            String oldPassword = (String) requestMap.get("old_password");
 
-        studentInfoService.changeUserPassword(oldPassword, newPassword);
-        return getSuccessResponseVO();
+            studentInfoService.changeUserPassword(oldPassword, newPassword);
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
     }
 
 }

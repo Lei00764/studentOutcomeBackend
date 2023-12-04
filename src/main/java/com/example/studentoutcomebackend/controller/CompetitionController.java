@@ -34,20 +34,24 @@ public class CompetitionController extends BaseController {
     public ResponseVO newTeam(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("student.competition.edit", null);
 
-        int competitionId = (int) requestMap.get("competition_id");
-        int termId = (int) requestMap.get("term_id");
-        int prizeId = (int) requestMap.get("prize_id");
-        String awardDate = (String) requestMap.get("award_date");
-        String description = (String) requestMap.get("desc");
+        try {
+            int competitionId = (int) requestMap.get("competition_id");
+            int termId = (int) requestMap.get("term_id");
+            int prizeId = (int) requestMap.get("prize_id");
+            String awardDate = (String) requestMap.get("award_date");
+            String description = (String) requestMap.get("desc");
 
-        // 校验 competitionId, termId, prizeId 是否对应
-        competitionService.checkCompetition(competitionId, termId, prizeId);
-        // 新建队伍
-        int newTeamId = competitionService.createNewTeam(competitionId, termId, prizeId, awardDate, description);
-        Map<String, Object> resMap = new HashMap<>();
-        resMap.put("team_id", newTeamId);
+            // 校验 competitionId, termId, prizeId 是否对应
+            competitionService.checkCompetition(competitionId, termId, prizeId);
+            // 新建队伍
+            int newTeamId = competitionService.createNewTeam(competitionId, termId, prizeId, awardDate, description);
+            Map<String, Object> resMap = new HashMap<>();
+            resMap.put("team_id", newTeamId);
 
-        return getSuccessResponseVO(resMap);
+            return getSuccessResponseVO(resMap);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
     }
 
     /**
@@ -58,12 +62,16 @@ public class CompetitionController extends BaseController {
      */
     @RequestMapping("queryTerm")
     public ResponseVO queryTerm(@RequestBody Map<String, Object> requestMap) {
-        int competitionId = (int) requestMap.get("competition_id");
+        try {
+            int competitionId = (int) requestMap.get("competition_id");
 
-        // 根据 competitionId 查看竞赛届别
-        Map<String, Object> CompetitionInfoList = competitionService.selectTermByCompetitionId(competitionId);
+            // 根据 competitionId 查看竞赛届别
+            Map<String, Object> CompetitionInfoList = competitionService.selectTermByCompetitionId(competitionId);
 
-        return getSuccessResponseVO(CompetitionInfoList);
+            return getSuccessResponseVO(CompetitionInfoList);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
     }
 
     /**
@@ -74,10 +82,15 @@ public class CompetitionController extends BaseController {
      */
     @RequestMapping("termPrize")
     public ResponseVO termPrize(@RequestBody Map<String, Object> requestMap) {
-        int termId = (int) requestMap.get("term_id");
+        try {
+            int termId = (int) requestMap.get("term_id");
 
-        Map<String, Object> termPrizeInfo = competitionService.selectPrizeInfoByTermId(termId);  // 根据 termId 查看竞赛奖项名称和含金量
-        return getSuccessResponseVO(termPrizeInfo);
+            // 根据 termId 查看竞赛奖项名称和含金量
+            Map<String, Object> termPrizeInfo = competitionService.selectPrizeInfoByTermId(termId);
+            return getSuccessResponseVO(termPrizeInfo);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
     }
 
     /**
@@ -88,11 +101,15 @@ public class CompetitionController extends BaseController {
      */
     @RequestMapping("getTeamInfo")
     public ResponseVO getTeamInfo(@RequestBody Map<String, Object> requestMap) {
-        int teamId = (int) requestMap.get("team_id");
-        Map<String, Object> resMap = new HashMap<>();
-        resMap.put("team_id", teamId);
+        try {
+            int teamId = (int) requestMap.get("team_id");
+            Map<String, Object> resMap = new HashMap<>();
+            resMap.put("team_id", teamId);
 
-        return getSuccessResponseVO(resMap);
+            return getSuccessResponseVO(resMap);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
     }
 
     /**
@@ -103,23 +120,29 @@ public class CompetitionController extends BaseController {
      */
     @RequestMapping("queryCompetition")
     public ResponseVO queryCompetition(@RequestBody Map<String, Object> requestMap) {
-        String keyword = (String) requestMap.get("keyword");
+        try {
+            String keyword = (String) requestMap.get("keyword");
 
-        // 根据 关键字 查询竞赛信息
-        Map<String, Object> competitionInfo = competitionService.selectCompetitionInfoByKeyword(keyword);
-        return getSuccessResponseVO(competitionInfo);
+            // 根据 关键字 查询竞赛信息
+            Map<String, Object> competitionInfo = competitionService.selectCompetitionInfoByKeyword(keyword);
+            return getSuccessResponseVO(competitionInfo);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+
     }
 
     @RequestMapping("getTeam")
     public ResponseVO getTeam(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("student.competition.querySelf", null);
-        try{
+
+        try {
             String fieldName = (String) requestMap.get("field");
             String keyword = (String) requestMap.get("keyword");
             boolean prizeId = (Boolean) requestMap.get("precise");
             int pageNo = (int) requestMap.get("page");
             Map<String, Object> resMap = new HashMap<>();
-            if(fieldName.equals("")){
+            if (fieldName.equals("")) {
                 List<Map<String, Object>> teams = competitionService.selectTeamByNothing(pageNo);
                 int teamCount = competitionService.selectTeamCountByNothing();
                 resMap.put("count", teamCount);
@@ -127,8 +150,78 @@ public class CompetitionController extends BaseController {
                 return getSuccessResponseVO(resMap);
             }
             throw new BusinessException("NOPE.");
-        }catch(ClassCastException e){
+        } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
         }
     }
+
+    /**
+     * 提交审核
+     *
+     * @param requestMap
+     * @return
+     */
+    @RequestMapping("submitToReview")
+    public ResponseVO submitToReview(@RequestBody Map<String, Object> requestMap) {
+        permissionService.throwIfDontHave("student.competition.edit", null);
+
+        try {
+            int teamId = (int) requestMap.get("team_id");
+
+            // 检查队伍是否存在
+            competitionService.checkTeamExist(teamId);
+
+            // 提交审核
+            competitionService.submitToReview(teamId);
+            return getSuccessResponseVO(null);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    /**
+     * 撤回审核申请
+     *
+     * @param requestMap
+     * @return
+     */
+    @RequestMapping("withdrawTeam")
+    public ResponseVO withdrawTeam(@RequestBody Map<String, Object> requestMap) {
+        permissionService.throwIfDontHave("student.competition.edit", null);
+
+        try {
+            int teamId = (int) requestMap.get("team_id");
+
+            // 检查队伍是否存在
+            competitionService.checkTeamExist(teamId);
+
+            // 撤回审核申请
+            competitionService.withdrawTeam(teamId);
+            return getSuccessResponseVO(null);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    /**
+     * 清除证书图片
+     */
+    @RequestMapping("imgClear")
+    public ResponseVO imageClear(@RequestBody Map<String, Object> requestMap) {
+        permissionService.throwIfDontHave("student.competition.edit", null);
+
+        try {
+            int teamId = (int) requestMap.get("team_id");
+
+            // 检查队伍是否存在
+            competitionService.checkTeamExist(teamId);
+
+            // 清除证书图片（即修改 image_id）
+            competitionService.clearCertification(teamId);
+            return getSuccessResponseVO(null);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
 }

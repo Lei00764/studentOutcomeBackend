@@ -28,26 +28,32 @@ public interface CompetitionMapper {
     /**
      * 在 COMPETITION 表，通过 competitionId 查 type_id 和 competition_name
      */
-    @Select("SELECT type_id, competition_name FROM COMPETITION WHERE id = #{competitionId}")
+    @Select("SELECT * FROM COMPETITION WHERE id = #{competitionId}")
     Map<String, Object> selectCompetitionInfoByCompetitionId(int competitionId);
 
     /**
      * 在 COMPETITION_PRIZE 表，通过 prizeId 查 prizeInfo
      */
-    @Select("SELECT term_id, prize_name, prize_order FROM COMPETITION_PRIZE WHERE id = #{prizeId}")
+    @Select("SELECT * FROM COMPETITION_PRIZE WHERE id = #{prizeId}")
     Map<String, Object> selectPrizeInfoByPrizeId(int TermId);
 
     /**
-     * 在 COMPETITION_TERM 表，通过 termId 查 competitionId
+     * 在 COMPETITION_TEAM 表，通过 teamId 查 teamInfo
      */
-    @Select("SELECT term_name, competition_id, level_id, organizer FROM COMPETITION_TERM WHERE id = #{TermId}")
+    @Select("SELECT * FROM COMPETITION_TEAM WHERE id = #{teamId}")
+    Map<String, Object> selectTeamInfoByTeamId(int teamId);
+
+    /**
+     * 在 COMPETITION_TERM 表，通过 termId 查 termInfo
+     */
+    @Select("SELECT * FROM COMPETITION_TERM WHERE id = #{TermId}")
     Map<String, Object> selectTermInfoByTermId(int TermId);
 
     /**
-     * 在 COMPETITION_TYPE 表，通过 typeId 查 type_name
+     * 在 COMPETITION_TYPE 表，通过 typeId 查 typeInfo
      */
-    @Select("SELECT type_name FROM COMPETITION_TYPE WHERE id = #{typeId}")
-    String selectTypeNameByTypeId(int typeId);
+    @Select("SELECT * FROM COMPETITION_TYPE WHERE id = #{typeId}")
+    Map<String, Object> selectTypeInfoByTypeId(int typeId);
 
     /**
      * 在 COMPETITION_TERM 表，通过 competitionId 查 termId, termName, levelId, organizer
@@ -81,17 +87,31 @@ public interface CompetitionMapper {
 
     /**
      * 不使用任何条件查询学生加入的参赛队伍
+     *
      * @param userId 用户id
      * @param offset 偏移量（(页号-1)*20）
      * @return
      */
-    List<Map<String,Object>> selectTeamByNothing(int userId, int offset);
+    List<Map<String, Object>> selectTeamByNothing(int userId, int offset);
 
     /**
      * 不使用任何条件查询学生加入的参赛队伍数量
+     *
      * @param userId 用户id
      * @return
      */
     int selectTeamCountByNothing(int userId);
 
+
+    /**
+     * 在 COMPETITION_TEAM 表中，将 verified 字段置为 status
+     */
+    @Update("UPDATE COMPETITION_TEAM SET verify_status = #{status} WHERE id = #{teamId}")
+    void updateTeamStatus(int teamId, int status);
+
+    /**
+     * 在 COMPETITION_TEAM 表中，将 image_id 字段置为 imageId
+     */
+    @Update("UPDATE COMPETITION_TEAM SET image_id = #{imageId} WHERE id = #{teamId}")
+    void updateTeamImage(int teamId, int imageId);
 }
