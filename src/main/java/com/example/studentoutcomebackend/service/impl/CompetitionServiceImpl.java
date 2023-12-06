@@ -175,17 +175,26 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     @Transactional
-    public List<Map<String, Object>> selectTeamByNothing(int pageNo) {
-        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
-        int userId = studentInfo.getUser_id();
-        return competitionMapper.selectTeamByNothing(userId, (pageNo - 1) * 20);
-    }
+    public Map<String, Object> selectTeamByCriteria(String keyword, String field, boolean precise, int pageNo) {
+        if(!field.equals("") && !field.equals("status_code") && !field.equals("competition_name") && !field.equals("team_id")){
+            throw new BusinessException(601, "参数错误");
+        }
 
-    @Override
-    public int selectTeamCountByNothing() {
         StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
         int userId = studentInfo.getUser_id();
-        return competitionMapper.selectTeamCountByNothing(userId);
+        Map<String, Object> callParams = new HashMap<>();
+        callParams.put("userId", userId);
+        callParams.put("keyword", keyword);
+        callParams.put("fieldName", field);
+        callParams.put("precise", precise ? 1 : 0);
+        callParams.put("pageNo", pageNo);
+        callParams.put("totalCount", -1);
+
+        var teams =  competitionMapper.selectTeamByCriteria(callParams);
+        Map<String, Object> ans = new HashMap<>();
+        ans.put("teams", teams);
+        ans.put("totalCount", callParams.get("totalCount"));
+        return ans;
     }
 
     /**

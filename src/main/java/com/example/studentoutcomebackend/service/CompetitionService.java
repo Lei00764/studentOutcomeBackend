@@ -39,10 +39,16 @@ public interface CompetitionService {
      */
     Map<String, Object> selectCompetitionInfoByKeyword(String keyword);
 
+    /**
+     * 根据条件去数据库里找当前用户加入的竞赛队伍
+     * @param keyword
+     * @param field
+     * @param precise
+     * @param pageNo
+     * @return map包含totalCount与teams属性
+     */
     @Transactional
-    List<Map<String, Object>> selectTeamByNothing(int pageNo);
-
-    int selectTeamCountByNothing();
+    Map<String, Object> selectTeamByCriteria(String keyword, String field, boolean precise, int pageNo);
 
     /**
      * 检查队伍是否存在

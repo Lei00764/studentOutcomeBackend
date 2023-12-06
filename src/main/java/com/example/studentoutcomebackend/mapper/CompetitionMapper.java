@@ -86,13 +86,19 @@ public interface CompetitionMapper {
     String selectLevelNameByLevelId(int levelId);
 
     /**
-     * 不使用任何条件查询学生加入的参赛队伍
+     * 使用任何条件查询学生加入的参赛队伍，详见存储过程的注释
      *
-     * @param userId 用户id
-     * @param offset 偏移量（(页号-1)*20）
      * @return
      */
-    List<Map<String, Object>> selectTeamByNothing(int userId, int offset);
+    @Select("{call SelectStudentCompetitionTeam(" +
+            "#{userId,jdbcType=INTEGER,mode=IN}," +
+            "#{keyword,jdbcType=VARCHAR,mode=IN}," +
+            "#{fieldName,jdbcType=VARCHAR,mode=IN}," +
+            "#{precise,jdbcType=INTEGER,mode=IN}," +
+            "#{pageNo,jdbcType=VARCHAR,mode=IN}," +
+            "#{totalCount,jdbcType=INTEGER,mode=OUT})}")
+    @Options(statementType = StatementType.CALLABLE)
+    List<Map<String, Object>> selectTeamByCriteria(Map<String, Object> params);
 
     /**
      * 不使用任何条件查询学生加入的参赛队伍数量

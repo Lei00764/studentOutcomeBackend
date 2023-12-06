@@ -141,14 +141,10 @@ public class CompetitionController extends BaseController {
             boolean prizeId = (Boolean) requestMap.get("precise");
             int pageNo = (int) requestMap.get("page");
             Map<String, Object> resMap = new HashMap<>();
-            if (fieldName.equals("")) {
-                List<Map<String, Object>> teams = competitionService.selectTeamByNothing(pageNo);
-                int teamCount = competitionService.selectTeamCountByNothing();
-                resMap.put("count", teamCount);
-                resMap.put("teams", teams);
-                return getSuccessResponseVO(resMap);
-            }
-            throw new BusinessException("NOPE.");
+            Map<String, Object> teams = competitionService.selectTeamByCriteria(keyword, fieldName, prizeId, pageNo);
+            resMap.put("count", teams.get("totalCount"));
+            resMap.put("teams", teams.get("teams"));
+            return getSuccessResponseVO(resMap);
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
         }
