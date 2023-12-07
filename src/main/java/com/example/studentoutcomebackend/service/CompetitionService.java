@@ -1,6 +1,8 @@
 package com.example.studentoutcomebackend.service;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -65,8 +67,19 @@ public interface CompetitionService {
      */
     void withdrawTeam(int teamId);
 
+
     /**
-     * 清除证书图片
+     * 设置/清除证书图片
+     * @param imageFile 如果imageFile为空就是清除
+     * @param teamId
+     * @return 证书的文件名，没有就是null
      */
-    void clearCertification(int teamId);
+    String uploadCertification(MultipartFile imageFile, int teamId);
+
+    /**
+     * 检查当前用户是否在这个竞赛队伍里，或者有teacher.competition.record.edit权限，没有就抛异常
+     * 顺便还能检查队伍是否存在
+     * @param teamId
+     */
+    void throwIfNotInTeam(int teamId);
 }

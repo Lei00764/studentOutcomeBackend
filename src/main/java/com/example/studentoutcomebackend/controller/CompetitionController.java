@@ -1,14 +1,19 @@
 package com.example.studentoutcomebackend.controller;
 
 import com.example.studentoutcomebackend.controller.base.BaseController;
+import com.example.studentoutcomebackend.controller.base.GlobalExceptionHandlerController;
 import com.example.studentoutcomebackend.entity.vo.ResponseVO;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.service.CompetitionService;
 import com.example.studentoutcomebackend.service.PermissionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +29,7 @@ public class CompetitionController extends BaseController {
     @Autowired
     private PermissionService permissionService;
 
+    private static final Logger logger = LoggerFactory.getLogger(CompetitionController.class);
     /**
      * 新建队伍
      *
@@ -207,16 +213,29 @@ public class CompetitionController extends BaseController {
 
         try {
             int teamId = (int) requestMap.get("team_id");
-
             // 检查队伍是否存在
             competitionService.checkTeamExist(teamId);
 
+            competitionService.throwIfNotInTeam(teamId);
+
+
             // 清除证书图片（即修改 image_id）
-            competitionService.clearCertification(teamId);
+            competitionService.uploadCertification(null, teamId);
             return getSuccessResponseVO(null);
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
         }
+    }
+
+    @RequestMapping("imgUpload")
+    public ResponseVO imgUpload(@RequestParam("image") MultipartFile imageFile, @RequestParam("team_id") int teamId){
+        permissionService.throwIfDontHave("student.competition.edit", null);
+        // 确定是否在队伍中或者是老师
+        competitionService.throwIfNotInTeam(teamId);
+
+        String fileName = competitionService.uploadCertification(imageFile, teamId);
+        // logger.info(fileName);
+        return getSuccessResponseVO();
     }
 
 }

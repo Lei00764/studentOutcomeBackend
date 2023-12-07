@@ -120,4 +120,19 @@ public interface CompetitionMapper {
      */
     @Update("UPDATE COMPETITION_TEAM SET image_id = #{imageId} WHERE id = #{teamId}")
     void updateTeamImage(int teamId, String imageId);
+
+    /**
+     * 在 COMPETITION_TEAM 表中，将 teamId的队伍的image_id 字段选出
+     */
+    @Select("select image_id from COMPETITION_TEAM where id = #{teamId} limit 1")
+    String selectTeamImage(int teamId);
+
+    /**
+     * 检测COMPETITION_TEAM_STUDENT中，学生是否有对应的team_id
+     * @param userId
+     * @param teamId
+     * @return 如果有返回1，没有返回null
+     */
+    @Select("select 1 from COMPETITION_TEAM_STUDENT where team_id=#{teamId} and user_id=#{userId} limit 1")
+    Object select1IfUserInTeam(int userId, int teamId);
 }

@@ -1,14 +1,18 @@
 package com.example.studentoutcomebackend.service.impl;
 
+import com.example.studentoutcomebackend.adapter.image.AlistImpl;
+import com.example.studentoutcomebackend.adapter.image.ImageService;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.service.CompetitionService;
+import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.service.StudentInfoService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +27,9 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Autowired
     StudentInfoService studentInfoService;
+
+    @Autowired
+    PermissionService permissionService;
 
     @Override
     @Transactional
@@ -228,13 +235,35 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     /**
-     * 清空证书图片
-     *
+     * 设置/清除证书图片
+     * @param imageFile 如果imageFile为空就是清除
      * @param teamId
      */
     @Override
     @Transactional
-    public void clearCertification(int teamId) {
-        competitionMapper.updateTeamImage(teamId, null);
+    public String uploadCertification(MultipartFile imageFile, int teamId) {
+        ImageService imageService = AlistImpl.get();
+        String oldImageName = competitionMapper.selectTeamImage(teamId);
+        String imageName;
+
+        // 之前有图片了就删除
+        if(oldImageName != null && !oldImageName.equals(""))
+            imageService.removeImage(oldImageName);
+
+        if(imageFile == null){
+            imageName = null;
+            competitionMapper.updateTeamImage(teamId, null);
+        }else{
+            imageName = imageService.saveImage(imageFile);
+            competitionMapper.updateTeamImage(teamId, imageName);
+        }
+        return imageName;
+    }
+
+    @Override
+    public void throwIfNotInTeam(int teamId) {
+        Object ans = competitionMapper.select1IfUserInTeam(studentInfoService.getCurrentUserInfo().getUser_id(), teamId);
+        if(ans == null)
+            permissionService.throwIfDontHave("teacher.competition.record.edit", "您不属于该竞赛队伍");
     }
 }
