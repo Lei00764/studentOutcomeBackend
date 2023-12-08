@@ -152,7 +152,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         result.put("status", teamInfo.get("verify_status"));
         result.put("award_date", teamInfo.get("award_date"));
-        result.put("certification_img_url", teamInfo.get("image_id"));
+        result.put("certification_img_url", "/certImg/" + teamInfo.get("image_id"));
         result.put("desc", teamInfo.get("description"));
         result.put("competition", competitionInfo);
         result.put("term", termInfo);
