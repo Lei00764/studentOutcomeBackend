@@ -30,6 +30,7 @@ public class CompetitionController extends BaseController {
     private PermissionService permissionService;
 
     private static final Logger logger = LoggerFactory.getLogger(CompetitionController.class);
+
     /**
      * 新建队伍
      *
@@ -228,7 +229,7 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("imgUpload")
-    public ResponseVO imgUpload(@RequestParam("image") MultipartFile imageFile, @RequestParam("team_id") int teamId){
+    public ResponseVO imgUpload(@RequestParam("image") MultipartFile imageFile, @RequestParam("team_id") int teamId) {
         permissionService.throwIfDontHave("student.competition.edit", null);
         // 确定是否在队伍中或者是老师
         competitionService.throwIfNotInTeam(teamId);

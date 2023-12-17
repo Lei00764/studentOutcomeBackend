@@ -81,4 +81,11 @@ public class StudentInfoServiceImpl implements StudentInfoService {
             throw new BusinessException(604, "旧密码错误");
     }
 
+    @Override
+    @Transactional
+    public boolean userIdExist(int userId) {
+        StudentInfo studentInfo = this.studentInfoMapper.selectUserByUserId(userId);
+        return studentInfo != null;
+    }
+
 }

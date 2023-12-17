@@ -13,4 +13,6 @@ public interface StudentInfoService {
 
     void changeUserPassword(String oldPassword, String newPassword);
 
+    boolean userIdExist(int userId);
+
 }
