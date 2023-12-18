@@ -1,5 +1,6 @@
 package com.example.studentoutcomebackend.service.impl;
 
+import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.Volunteer.Volunteer;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
@@ -26,10 +27,12 @@ public class VolunteerServiceImpl implements VolunteerService {
     @Autowired
     StudentInfoService studentInfoService;
 
-
     @Override
     @Transactional
-    public Map<String, Object> getVolunteerInfoByUserId(int userId) {
+    public Map<String, Object> getVolunteerInfoByUserId() {
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+        
         List<Map<String, Object>> volunteerInfo = volunteerMapper.selectVolunteerByUserId(userId);
 
         Map<String, Object> result = new HashMap<>();
@@ -39,8 +42,11 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     @Transactional
-    public void insertVolunteerInfo(int userId, String volName, String volType, String participateTime, int durationDay, int durationHour, String volDetail, String imageId) {
+    public void insertVolunteerInfo(String volName, String volType, String participateTime, int durationDay, int durationHour, String volDetail, String imageId) {
         // userId 是否存在
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+
         if (!studentInfoService.userIdExist(userId)) {
             throw new BusinessException(601, "用户 id 不存在");
         }
@@ -50,15 +56,18 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     @Transactional
-    public void deleteVolunteerInfo(int volId, int userId) {
+    public void deleteVolunteerInfo(int volId) {
         Map<String, Object> volunteerInfo = volunteerMapper.selectVolunteerByVolId(volId);
         if (volunteerInfo == null) {
             throw new BusinessException(601, "当前志愿服务不存在");
         }
 
-        Integer userInfoId = (Integer) volunteerInfo.get("user_id");  // 数据库中记录的实际 userId
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
 
-        if (userInfoId == null) {
+        int userInfoId = (int) volunteerInfo.get("user_id");  // 数据库中记录的实际 userId
+
+        if (userInfoId != userId) {
             throw new BusinessException("userId 和 volId 不对应");
         }
 
@@ -67,12 +76,15 @@ public class VolunteerServiceImpl implements VolunteerService {
 
     @Override
     @Transactional
-    public Map<String, Object> getVolunteerVerification(int userId) {
+    public Map<String, Object> getVolunteerVerification() {
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+
         // userId 是否存在
         if (!studentInfoService.userIdExist(userId)) {
             throw new BusinessException(601, "用户 id 不存在");
         }
-        
+
         List<Map<String, Object>> volunteersVerification = volunteerMapper.selectVolunteersVerification(userId);
 
         Map<String, Object> result = new HashMap<>();

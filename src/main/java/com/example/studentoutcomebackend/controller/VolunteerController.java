@@ -26,10 +26,9 @@ public class VolunteerController extends BaseController {
      * @return
      */
     @RequestMapping("/selectVolunteerInfo")
-    public ResponseVO selectVolunteerInfo(@RequestBody Map<String, Object> requestMap) {
+    public ResponseVO selectVolunteerInfo() {
         try {
-            int userId = (int) requestMap.get("user_id");
-            Map<String, Object> volunteerInfo = volunteerService.getVolunteerInfoByUserId(userId);
+            Map<String, Object> volunteerInfo = volunteerService.getVolunteerInfoByUserId();
 
             return getSuccessResponseVO(volunteerInfo);
         } catch (ClassCastException e) {
@@ -46,7 +45,6 @@ public class VolunteerController extends BaseController {
     @RequestMapping("/insertVolunteerInfo")
     public ResponseVO insertVolunteerInfo(@RequestBody Map<String, Object> requestMap) {
         try {
-            int userId = (int) requestMap.get("user_id");
             String volName = (String) requestMap.get("vol_name");
             String volType = (String) requestMap.get("vol_type");
             String participateTime = (String) requestMap.get("participate_time");
@@ -55,7 +53,7 @@ public class VolunteerController extends BaseController {
             String volDetail = (String) requestMap.get("vol_detail");
             String imageId = requestMap.containsKey("image_id") ? (String) requestMap.get("image_id") : null;
 
-            volunteerService.insertVolunteerInfo(userId, volName, volType, participateTime, durationDay, durationHour, volDetail, imageId);
+            volunteerService.insertVolunteerInfo(volName, volType, participateTime, durationDay, durationHour, volDetail, imageId);
 
             return getSuccessResponseVO(null);
         } catch (ClassCastException e) {
@@ -72,9 +70,8 @@ public class VolunteerController extends BaseController {
     @RequestMapping("/deleteVolunteerInfo")
     public ResponseVO deleteVolunteerInfo(@RequestBody Map<String, Object> requestMap) {
         try {
-            int userId = (int) requestMap.get("user_id");
             int volId = (int) requestMap.get("vol_id");
-            volunteerService.deleteVolunteerInfo(volId, userId);
+            volunteerService.deleteVolunteerInfo(volId);
 
             return getSuccessResponseVO(null);
         } catch (ClassCastException e) {
@@ -91,8 +88,7 @@ public class VolunteerController extends BaseController {
     @RequestMapping("/getVolunteerVerification")
     public ResponseVO getVolunteerVerification(@RequestBody Map<String, Object> requestMap) {
         try {
-            int userId = (int) requestMap.get("user_id");
-            Map<String, Object> result = volunteerService.getVolunteerVerification(userId);
+            Map<String, Object> result = volunteerService.getVolunteerVerification();
 
             return getSuccessResponseVO(result);
         } catch (ClassCastException e) {

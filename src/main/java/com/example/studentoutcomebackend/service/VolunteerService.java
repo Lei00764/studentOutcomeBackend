@@ -11,21 +11,21 @@ public interface VolunteerService {
      * @param userId
      * @return
      */
-    Map<String, Object> getVolunteerInfoByUserId(int userId);
+    Map<String, Object> getVolunteerInfoByUserId();
 
     /**
      * 插入一条学生志愿申报信息
      */
-    void insertVolunteerInfo(int userId, String volName, String volType, String participateTime, int durationDay, int durationHour, String volDetail, String imageId);
+    void insertVolunteerInfo(String volName, String volType, String participateTime, int durationDay, int durationHour, String volDetail, String imageId);
 
     /**
      * 删除一条学生志愿申报信息
      */
-    void deleteVolunteerInfo(int volId, int userId);
+    void deleteVolunteerInfo(int volId);
 
     /**
      * 获取指定 userId 待审核的填写记录
      */
-    Map<String, Object> getVolunteerVerification(int userId);
+    Map<String, Object> getVolunteerVerification();
 
 }
