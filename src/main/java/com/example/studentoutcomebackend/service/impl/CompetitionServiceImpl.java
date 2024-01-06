@@ -159,7 +159,7 @@ public class CompetitionServiceImpl implements CompetitionService {
         result.put("prize", prizeInfo);
         result.put("members", membersInfo);
         result.put("logs", logsInfo);
-        
+
         return result;
     }
 
@@ -183,7 +183,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public Map<String, Object> selectTeamByCriteria(String keyword, String field, boolean precise, int pageNo) {
-        if(!field.equals("") && !field.equals("status_code") && !field.equals("competition_name") && !field.equals("team_id")){
+        if (!field.equals("") && !field.equals("status_code") && !field.equals("competition_name") && !field.equals("team_id")) {
             throw new BusinessException(601, "参数错误");
         }
 
@@ -197,7 +197,7 @@ public class CompetitionServiceImpl implements CompetitionService {
         callParams.put("pageNo", pageNo);
         callParams.put("totalCount", -1);
 
-        var teams =  competitionMapper.selectTeamByCriteria(callParams);
+        var teams = competitionMapper.selectTeamByCriteria(callParams);
         Map<String, Object> ans = new HashMap<>();
         ans.put("teams", teams);
         ans.put("totalCount", callParams.get("totalCount"));
@@ -236,6 +236,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     /**
      * 设置/清除证书图片
+     *
      * @param imageFile 如果imageFile为空就是清除
      * @param teamId
      */
@@ -247,13 +248,13 @@ public class CompetitionServiceImpl implements CompetitionService {
         String imageName;
 
         // 之前有图片了就删除
-        if(oldImageName != null && !oldImageName.equals(""))
+        if (oldImageName != null && !oldImageName.equals(""))
             imageService.removeImage(oldImageName);
 
-        if(imageFile == null){
+        if (imageFile == null) {
             imageName = null;
             competitionMapper.updateTeamImage(teamId, null);
-        }else{
+        } else {
             imageName = imageService.saveImage(imageFile);
             competitionMapper.updateTeamImage(teamId, imageName);
         }
@@ -263,7 +264,8 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     public void throwIfNotInTeam(int teamId) {
         Object ans = competitionMapper.select1IfUserInTeam(studentInfoService.getCurrentUserInfo().getUser_id(), teamId);
-        if(ans == null)
+        if (ans == null)
             permissionService.throwIfDontHave("teacher.competition.record.edit", "您不属于该竞赛队伍");
     }
+
 }

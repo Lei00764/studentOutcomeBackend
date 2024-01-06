@@ -43,6 +43,7 @@ public interface CompetitionService {
 
     /**
      * 根据条件去数据库里找当前用户加入的竞赛队伍
+     *
      * @param keyword
      * @param field
      * @param precise
@@ -70,6 +71,7 @@ public interface CompetitionService {
 
     /**
      * 设置/清除证书图片
+     *
      * @param imageFile 如果imageFile为空就是清除
      * @param teamId
      * @return 证书的文件名，没有就是null
@@ -79,7 +81,9 @@ public interface CompetitionService {
     /**
      * 检查当前用户是否在这个竞赛队伍里，或者有teacher.competition.record.edit权限，没有就抛异常
      * 顺便还能检查队伍是否存在
+     *
      * @param teamId
      */
     void throwIfNotInTeam(int teamId);
+
 }

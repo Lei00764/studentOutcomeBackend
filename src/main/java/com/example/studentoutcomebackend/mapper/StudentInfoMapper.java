@@ -34,4 +34,7 @@ public interface StudentInfoMapper {
     })
     int updateUserPassword(int userId, String oldPassword, String newPassword);
 
+    @Select("SELECT * FROM STUDENT_INFO WHERE user_id=#{userId}")
+    StudentInfo selectUserByUserId(int userId);
+
 }
