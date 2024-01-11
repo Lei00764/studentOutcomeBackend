@@ -1,5 +1,6 @@
 package com.example.studentoutcomebackend.mapper;
 
+import com.example.studentoutcomebackend.entity.Competition.*;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.StatementType;
 
@@ -28,44 +29,44 @@ public interface CompetitionMapper {
     /**
      * 在 COMPETITION 表，通过 competitionId 查 type_id 和 competition_name
      */
-    @Select("SELECT * FROM COMPETITION WHERE id = #{competitionId}")
-    Map<String, Object> selectCompetitionInfoByCompetitionId(int competitionId);
+    @Select("SELECT * FROM COMPETITION WHERE id = #{competitionId} limit 1")
+    Competition selectCompetitionInfoByCompetitionId(int competitionId);
 
     /**
      * 在 COMPETITION_PRIZE 表，通过 prizeId 查 prizeInfo
      */
     @Select("SELECT * FROM COMPETITION_PRIZE WHERE id = #{prizeId}")
-    Map<String, Object> selectPrizeInfoByPrizeId(int TermId);
+    CompetitionPrize selectPrizeInfoByPrizeId(int TermId);
 
     /**
      * 在 COMPETITION_TEAM 表，通过 teamId 查 teamInfo
      */
     @Select("SELECT * FROM COMPETITION_TEAM WHERE id = #{teamId}")
-    Map<String, Object> selectTeamInfoByTeamId(int teamId);
+    CompetitionTeam selectTeamInfoByTeamId(int teamId);
 
     /**
      * 在 COMPETITION_TERM 表，通过 termId 查 termInfo
      */
     @Select("SELECT * FROM COMPETITION_TERM WHERE id = #{TermId}")
-    Map<String, Object> selectTermInfoByTermId(int TermId);
+    CompetitionTerm selectTermInfoByTermId(int TermId);
 
     /**
      * 在 COMPETITION_TYPE 表，通过 typeId 查 typeInfo
      */
     @Select("SELECT * FROM COMPETITION_TYPE WHERE id = #{typeId}")
-    Map<String, Object> selectTypeInfoByTypeId(int typeId);
+    CompetitionType selectTypeInfoByTypeId(int typeId);
 
     /**
      * 在 COMPETITION_TERM 表，通过 competitionId 查 termId, termName, levelId, organizer
      */
-    @Select("SELECT id, term_name, level_id, organizer FROM COMPETITION_TERM WHERE competition_id = #{competitionId}")
-    List<Map<String, Object>> selectTermInfoByCompetitionId(int competitionId);
+    @Select("SELECT id, term_name, level_id, organizer, competition_id FROM COMPETITION_TERM WHERE competition_id = #{competitionId}")
+    List<CompetitionTerm> selectTermInfoByCompetitionId(int competitionId);
 
     /**
      * 在 COMPETITION_PRIZE 表中，通过 termId 查 prizeId, prizeName, prizeOrder
      */
     @Select("SELECT id, prize_name, prize_order FROM COMPETITION_PRIZE WHERE term_id = #{termId}")
-    List<Map<String, Object>> selectPrizeInfoByTermId(int termId);
+    List<CompetitionPrize> selectPrizeInfoByTermId(int termId);
 
     /**
      * 在 COMPETITION 表中，通过关键字查找竞赛信息
@@ -82,8 +83,8 @@ public interface CompetitionMapper {
     /**
      * 在 COMPETITION_LEVEL 表中，通过 levelId 查 levelName
      */
-    @Select("SELECT level_name FROM COMPETITION_LEVEL WHERE id = #{levelId}")
-    String selectLevelNameByLevelId(int levelId);
+    @Select("SELECT level_name, id FROM COMPETITION_LEVEL WHERE id = #{levelId}")
+    CompetitionLevel selectLevelNameByLevelId(int levelId);
 
     /**
      * 使用任何条件查询学生加入的参赛队伍，详见存储过程的注释
@@ -135,4 +136,39 @@ public interface CompetitionMapper {
      */
     @Select("select 1 from COMPETITION_TEAM_STUDENT where team_id=#{teamId} and user_id=#{userId} limit 1")
     Object select1IfUserInTeam(int userId, int teamId);
+
+    /**
+     * 获取队伍的所有成员
+     * @param teamId
+     * @return
+     */
+    @Select("select team_id, COMPETITION_TEAM_STUDENT.user_id, stu_id, " +
+            "stu_name, contribution_order as 'order', verified from COMPETITION_TEAM_STUDENT natural join STUDENT_INFO where team_id=#{teamId}")
+    List<CompetitionTeamStudent> selectTeamCompetitionTeamStudentByTeamId(int teamId);
+
+    /**
+     * 更新队伍的基础信息
+     * @param teamId
+     * @param newCompetitionId
+     * @param newTermId
+     * @param newPrizeId
+     * @param newAwardDate
+     * @param newDesc
+     */
+    @Update("update COMPETITION_TEAM set " +
+            "competition_id=#{newCompetitionId}," +
+            "term_id=#{newTermId}," +
+            "prize_id=#{newPrizeId}," +
+            "award_date=#{newAwardDate}," +
+            "description=#{newDesc} " +
+            "where id=#{teamId}")
+    void updateTeamBasicInfo(int teamId, int newCompetitionId, int newTermId, int newPrizeId, String newAwardDate, String newDesc);
+
+    /**
+     * 把一个学生加入到队伍中
+     * @param teamId
+     * @param userId
+     */
+    @Insert("insert into COMPETITION_TEAM_STUDENT (team_id, user_id, contribution_order, verified) values (#{teamId}, #{userId}, 0, false)")
+    void insertCompetitionTeamStudent(int teamId, int userId);
 }

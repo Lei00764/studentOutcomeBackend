@@ -2,14 +2,19 @@ package com.example.studentoutcomebackend.service.impl;
 
 import com.example.studentoutcomebackend.adapter.image.AlistImpl;
 import com.example.studentoutcomebackend.adapter.image.ImageService;
+import com.example.studentoutcomebackend.entity.Competition.*;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.service.CompetitionService;
 import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.service.StudentInfoService;
+import com.example.studentoutcomebackend.utils.SM3Util;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class CompetitionServiceImpl implements CompetitionService {
@@ -31,24 +37,34 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Autowired
     PermissionService permissionService;
 
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+
+    /**
+     * 检查这三个是否匹配，不匹配直接抛异常
+     * @param competitionId
+     * @param termId
+     * @param prizeId
+     */
     @Override
     @Transactional
     public void checkCompetition(int competitionId, int termId, int prizeId) {
-        Map<String, Object> PrizeInfo = competitionMapper.selectPrizeInfoByPrizeId(prizeId);
+        CompetitionPrize PrizeInfo = competitionMapper.selectPrizeInfoByPrizeId(prizeId);
 
         if (PrizeInfo == null) {
             throw new BusinessException("prizeId 不存在");
         }
-        if (termId != (int) PrizeInfo.get("term_id")) {
+        if (termId != PrizeInfo.getTerm_id()) {
             throw new BusinessException("termId, prizeId 不对应");
         }
 
-        Map<String, Object> TermInfo = competitionMapper.selectTermInfoByTermId(termId);
+        CompetitionTerm TermInfo = competitionMapper.selectTermInfoByTermId(termId);
 
         if (TermInfo == null) {
             throw new BusinessException("termId 不存在");
         }
-        if (competitionId != (int) TermInfo.get("competition_id")) {
+        if (competitionId != TermInfo.getCompetition_id()) {
             throw new BusinessException("competitionId, termId, prizeId 不对应");
         }
     }
@@ -78,34 +94,32 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     /**
-     * 根据 competitionId 查看竞赛届别相关信息
+     * 根据 competitionId 查看竞赛届别相关信息，最后还包含主办方之类的信息
      *
      * @param competitionId
      */
     @Override
     @Transactional
     public Map<String, Object> selectTermByCompetitionId(int competitionId) {
-        List<Map<String, Object>> termInfoList = competitionMapper.selectTermInfoByCompetitionId(competitionId);
 
-        Map<String, Object> competitionInfo = competitionMapper.selectCompetitionInfoByCompetitionId(competitionId);
-        String competitionName = (String) competitionInfo.get("competition_name");
-        int typeId = (int) competitionInfo.get("type_id");
+        // 把这个竞赛的所有届数都拉出来
+        List<CompetitionTerm> termInfoList = competitionMapper.selectTermInfoByCompetitionId(competitionId);
 
-        String typeName = competitionMapper.selectTypeInfoByTypeId(typeId).get("type_name").toString();
+        // 获得竞赛相关的信息
+        Competition competitionInfo = competitionMapper.selectCompetitionInfoByCompetitionId(competitionId);
 
 
         List<Map<String, Object>> CompetitionInfoList = new ArrayList<>();
 
-        for (Map<String, Object> termInfo : termInfoList) {
+        for (CompetitionTerm termInfo : termInfoList) {
             Map<String, Object> CompetitionInfo = new HashMap<>();
 
-            CompetitionInfo.put("competition_name", competitionName);
-            CompetitionInfo.put("type_name", typeName);
-            CompetitionInfo.put("id", termInfo.get("id"));
-            CompetitionInfo.put("term_name", termInfo.get("term_name"));
-            String levelName = competitionMapper.selectLevelNameByLevelId((int) termInfo.get("level_id"));
-            CompetitionInfo.put("level_name", levelName);
-            CompetitionInfo.put("organizer", termInfo.get("organizer"));
+            // CompetitionInfo.put("competition_name", );
+            CompetitionInfo.put("type_name", competitionInfo.getType().getName());
+            CompetitionInfo.put("id", termInfo.getId());
+            CompetitionInfo.put("term_name", termInfo.getName());
+            CompetitionInfo.put("level_name", termInfo.getLevel().getLevelName());
+            CompetitionInfo.put("organizer", termInfo.getOrganizer());
 
             CompetitionInfoList.add(CompetitionInfo);
         }
@@ -122,7 +136,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public Map<String, Object> selectPrizeInfoByTermId(int termId) {
-        List<Map<String, Object>> prizeInfoList = competitionMapper.selectPrizeInfoByTermId(termId);
+        List<CompetitionPrize> prizeInfoList = competitionMapper.selectPrizeInfoByTermId(termId);
 
         Map<String, Object> result = new HashMap<>();
         result.put("prizes", prizeInfoList);
@@ -136,7 +150,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public Map<String, Object> selectTeamInfoByTeamId(int teamId) {
-        Map<String, Object> teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
 
         if (teamInfo == null) {
             throw new BusinessException(601, "队伍不存在");
@@ -147,13 +161,31 @@ public class CompetitionServiceImpl implements CompetitionService {
         Map<String, Object> competitionInfo = new HashMap<>();
         Map<String, Object> termInfo = new HashMap<>();
         Map<String, Object> prizeInfo = new HashMap<>();
-        List<Map<String, Object>> membersInfo = new ArrayList<>();
+
+        List<CompetitionTeamStudent> membersInfo = teamInfo.getCompetitionTeamStudentList();
         List<Map<String, Object>> logsInfo = new ArrayList<>();
 
-        result.put("status", teamInfo.get("verify_status"));
-        result.put("award_date", teamInfo.get("award_date"));
-        result.put("certification_img_url", "/certImg/" + teamInfo.get("image_id"));
-        result.put("desc", teamInfo.get("description"));
+        result.put("status", teamInfo.getVerifyStatus());
+        result.put("award_date", teamInfo.getAwardDate());
+        String imgUrl = teamInfo.getImageId();
+        if(imgUrl == null)
+            result.put("certification_img_url", "");
+        else
+            result.put("certification_img_url", "/certImg/" + teamInfo.getImageId());
+        result.put("desc", teamInfo.getDescription());
+
+        competitionInfo.put("id", teamInfo.getCompetition().getId());
+        competitionInfo.put("competition_name", teamInfo.getCompetition().getCompetitionName());
+        competitionInfo.put("type_name", teamInfo.getCompetition().getType().getName());
+
+        termInfo.put("organizer", teamInfo.getTerm().getOrganizer());
+        termInfo.put("id", teamInfo.getTerm().getId());
+        termInfo.put("level_name", teamInfo.getTerm().getLevel().getLevelName());
+        termInfo.put("name", teamInfo.getTerm().getName());
+
+        prizeInfo.put("id", teamInfo.getPrize().getId());
+        prizeInfo.put("name", teamInfo.getPrize().getPrize_name());
+
         result.put("competition", competitionInfo);
         result.put("term", termInfo);
         result.put("prize", prizeInfo);
@@ -210,7 +242,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public void checkTeamExist(int teamId) {
-        Map<String, Object> teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
         if (teamInfo == null) {
             throw new BusinessException(601, "队伍不存在");
         }
@@ -267,5 +299,52 @@ public class CompetitionServiceImpl implements CompetitionService {
         if (ans == null)
             permissionService.throwIfDontHave("teacher.competition.record.edit", "您不属于该竞赛队伍");
     }
+
+    @Override
+    public void editTeamBasicInfo(int teamId, int newCompetitionId, int newTermId, int newPrizeId, String newAwardDate, String newDesc) {
+        CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        teamInfo.editBasicInfo(newCompetitionId, newTermId, newPrizeId, newAwardDate, newDesc);
+
+    }
+
+    @Override
+    public String createInvitationCode(int teamId) {
+        // 先检查当前用户能不能修改
+        Object ans = competitionMapper.select1IfUserInTeam(studentInfoService.getCurrentUserInfo().getUser_id(), teamId);
+        if (ans == null)
+            permissionService.throwIfDontHave("teacher.competition.record.edit", "您不属于该竞赛队伍");
+        String code = SM3Util.getRandomString();
+        String teamIdStr = String.valueOf(teamId);
+        // 先删除旧的
+        String codeOld = redisTemplate.opsForValue().get("competition:teamCode:" + teamIdStr);
+        if(codeOld != null){
+            redisTemplate.delete("competition:codeTeam:" + codeOld);
+        }
+
+        redisTemplate.opsForValue().set("competition:codeTeam:" + code, teamIdStr, 1, TimeUnit.DAYS);
+        redisTemplate.opsForValue().set("competition:teamCode:" + teamIdStr, code, 1, TimeUnit.DAYS);
+
+        return code;
+    }
+
+    @Override
+    public void invitationCode(String code) {
+        String teamIdStr = redisTemplate.opsForValue().get("competition:codeTeam:" + code);
+        if(teamIdStr == null)
+            throw new BusinessException(606, "邀请码无效或过期");
+        int teamId = Integer.parseInt(teamIdStr);
+        CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+
+        Object ans = competitionMapper.select1IfUserInTeam(studentInfoService.getCurrentUserInfo().getUser_id(), teamId);
+        if (ans != null)
+            throw new BusinessException("您已经加入该队伍了！");
+
+        if(team == null)
+            throw new BusinessException("队伍不存在");
+
+        team.addMember(studentInfoService.getCurrentUserInfo());
+
+    }
+
 
 }

@@ -86,4 +86,20 @@ public interface CompetitionService {
      */
     void throwIfNotInTeam(int teamId);
 
+    /**
+     * 修改队伍的基本信息
+     */
+    void editTeamBasicInfo(int teamId, int newCompetitionId, int newTermId, int newPrizeId, String newAwardDate, String newDesc);
+
+    /**
+     * 创建队伍的邀请码
+     * @param teamId
+     */
+    String createInvitationCode(int teamId);
+
+    /**
+     * 使用队伍的邀请码
+     * @param code
+     */
+    void invitationCode(String code);
 }

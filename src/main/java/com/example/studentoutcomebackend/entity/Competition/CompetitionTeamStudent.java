@@ -7,8 +7,11 @@ public class CompetitionTeamStudent {
 
     private int team_id;
 
-    private int student_id;
+    private int user_id;
+    private String stu_id;
+    private String stu_name;
+    private int order;
 
-    private int contribution_order;
+    private boolean verified;
 
 }

@@ -6,6 +6,7 @@ import com.example.studentoutcomebackend.entity.vo.ResponseVO;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.service.CompetitionService;
 import com.example.studentoutcomebackend.service.PermissionService;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -237,6 +238,62 @@ public class CompetitionController extends BaseController {
         String fileName = competitionService.uploadCertification(imageFile, teamId);
         // logger.info(fileName);
         return getSuccessResponseVO();
+    }
+
+    @RequestMapping("editTeam")
+    public ResponseVO editTeam(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("student.competition.edit", null);
+
+        try {
+            int teamId = (int) requestMap.get("team_id");
+
+            // 检查队伍是否存在
+            competitionService.checkTeamExist(teamId);
+
+            // 如果info不是null，则修改info
+            Map<String, Object> newInfo = (Map<String, Object>) requestMap.get("info");
+            if(newInfo != null)
+                competitionService.editTeamBasicInfo(teamId,
+                        (Integer) newInfo.get("competition_id"),
+                        (Integer) newInfo.get("term_id"),
+                        (Integer) newInfo.get("prize_id"),
+                        (String) newInfo.get("award_date"),
+                        (String) newInfo.get("desc"));
+
+            return getSuccessResponseVO(null);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("createInvitationCode")
+    public ResponseVO createInvitationCode(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("student.competition.edit", null);
+
+        try {
+            int teamId = (int) requestMap.get("team_id");
+
+            String code = competitionService.createInvitationCode(teamId);
+            Map<String, Object> resMap = new HashMap<>();
+            resMap.put("code", code);
+
+            return getSuccessResponseVO(resMap);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("invitationCode")
+    public ResponseVO invitationCode(@RequestBody Map<String, Object> requestMap){
+        try {
+            String code = (String) requestMap.get("invitation_code");
+
+            competitionService.invitationCode(code);
+
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
     }
 
 }

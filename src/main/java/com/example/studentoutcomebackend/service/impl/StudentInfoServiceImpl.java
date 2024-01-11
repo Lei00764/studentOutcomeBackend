@@ -28,10 +28,14 @@ public class StudentInfoServiceImpl implements StudentInfoService {
     @Override
     @Transactional
     public void login(String userName, String password) {
-        StudentInfo studentInfo = this.studentInfoMapper.selectByStuIdAndPassword(userName, password);
+        // SM3 计算完再去和数据库匹配
+
+        StudentInfo studentInfo = this.studentInfoMapper.selectByStuId(userName);
+
         if (studentInfo == null) {
             throw new BusinessException(601, "账号或密码错误");
         }
+        studentInfo.checkPassword(password);
         // 看下账号是否有登录权限
         permissionService.throwIfDontHave(studentInfo.getUser_id(), "user.login", "账号不被允许登录");
 
@@ -71,14 +75,9 @@ public class StudentInfoServiceImpl implements StudentInfoService {
 
         permissionService.throwIfDontHave("user.changePassword", null);  // 检验用户是否有修改密码的权限
 
-        if (oldPassword.equals(newPassword))
-            throw new BusinessException(602, "新密码不能与旧密码相同");
-        else if (newPassword.length() < 8)
-            throw new BusinessException(603, "新密码太短，至少为8位");
+        studentInfo.changePassword(oldPassword, newPassword);
 
-        int a = studentInfoMapper.updateUserPassword(studentInfo.getUser_id(), oldPassword, newPassword);
-        if (a <= 0)
-            throw new BusinessException(604, "旧密码错误");
+
     }
 
     @Override

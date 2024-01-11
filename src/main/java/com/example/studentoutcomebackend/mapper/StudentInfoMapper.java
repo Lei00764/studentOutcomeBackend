@@ -10,14 +10,13 @@ import org.apache.ibatis.annotations.*;
 public interface StudentInfoMapper {
 
     /**
-     * 根据账号密码查询指定用户
+     * 根据账号查询指定用户
      *
      * @param stuId
-     * @param userPassword
      * @return
      */
-    @Select("SELECT * FROM STUDENT_INFO WHERE stu_id=#{stuId} AND user_password=#{userPassword}")
-    StudentInfo selectByStuIdAndPassword(String stuId, String userPassword);
+    @Select("SELECT * FROM STUDENT_INFO WHERE stu_id=#{stuId}")
+    StudentInfo selectByStuId(String stuId);
 
     /**
      * 用户更新密码
