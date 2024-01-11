@@ -80,4 +80,44 @@ public class TicketController extends BaseController {
         }
     }
 
+    /**
+     * 获取工单列表
+     */
+    @RequestMapping("/getTicketList")
+    public ResponseVO getTicketList() {
+        try {
+            return getSuccessResponseVO(ticketService.getTicketList());
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+
+    /**
+     * 获取指定工单的详情
+     */
+    @RequestMapping("/getTicketInfo")
+    public ResponseVO getTicketInfo(@RequestBody Map<String, Object> requestMap) {
+        try {
+            int ticketId = (int) requestMap.get("ticket_id");
+
+            return getSuccessResponseVO(ticketService.getTicketInfo(ticketId));
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    /**
+     * 获取指定工单的回复列表
+     */
+    @RequestMapping("/getTicketContentList")
+    public ResponseVO getTicketContentList(@RequestBody Map<String, Object> requestMap) {
+        try {
+            int ticketId = (int) requestMap.get("ticket_id");
+
+            return getSuccessResponseVO(ticketService.getTicketContentList(ticketId));
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
 }

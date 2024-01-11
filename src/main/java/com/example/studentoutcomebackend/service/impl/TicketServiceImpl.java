@@ -10,6 +10,9 @@ import com.example.studentoutcomebackend.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @program:studentOutcomeBackend
  * @author: Xiang Lei
@@ -67,9 +70,11 @@ public class TicketServiceImpl implements TicketService {
         int userId = studentInfo.getUser_id();
 
         // 检查权限
-        boolean isAdmin = permissionService.checkPermission(ticketId, "admin.reply");
-
-        String senderType = isAdmin ? "admin" : "student";
+//        boolean isAdmin = permissionService.checkPermission(userId, "admin.reply");
+//
+//        String senderType = isAdmin ? "admin" : "student";
+        // TODO: 根据学号判断是 admin 还是 student
+        String senderType = "admin";
 
         String sendTime = TimeUtil.getCurrentTime();
 
@@ -85,6 +90,46 @@ public class TicketServiceImpl implements TicketService {
         }
 
         ticketMapper.closeTicket(ticketId);
+    }
+
+    @Override
+    public Map<String, Object> getTicketList() {
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+
+        List<Map<String, Object>> tickets = ticketMapper.selectTicketByUserId(userId);
+
+        Map<String, Object> result = new java.util.HashMap<>();
+
+        result.put("tickets", tickets);
+
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getTicketInfo(int ticketId) {
+        if (!isTicketIdExist(ticketId)) {
+            throw new BusinessException(601, "工单不存在");
+        }
+
+        Map<String, Object> result = new java.util.HashMap<>();
+
+        result.put("ticket", ticketMapper.selectTicketByTicketId(ticketId));
+
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> getTicketContentList(int ticketId) {
+        if (!isTicketIdExist(ticketId)) {
+            throw new BusinessException(601, "工单不存在");
+        }
+
+        Map<String, Object> result = new java.util.HashMap<>();
+
+        result.put("ticketContents", ticketMapper.selectTicketContentByTicketId(ticketId));
+
+        return result;
     }
 
 }

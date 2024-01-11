@@ -3,6 +3,8 @@ package com.example.studentoutcomebackend.service;
 import com.example.studentoutcomebackend.entity.Ticket;
 import com.example.studentoutcomebackend.entity.TicketContent;
 
+import java.util.Map;
+
 /**
  * @program: studentOutcomeBackend
  * @author: Xiang Lei
@@ -43,4 +45,20 @@ public interface TicketService {
      * @return 更新后的 Ticket 对象
      */
     void closeTicket(int ticketId);
+
+    /**
+     * 获取工单列表
+     */
+    Map<String, Object> getTicketList();
+
+    /**
+     * 获取工单详情
+     */
+    Map<String, Object> getTicketInfo(int ticketId);
+
+    /**
+     * 获取工单回复列表
+     */
+    Map<String, Object> getTicketContentList(int ticketId);
+
 }

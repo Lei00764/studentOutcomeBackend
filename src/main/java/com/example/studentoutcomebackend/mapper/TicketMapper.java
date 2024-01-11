@@ -5,6 +5,9 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @program:studentOutcomeBackend
  * @author: Xiang Lei
@@ -45,5 +48,23 @@ public interface TicketMapper {
      */
     @Update("UPDATE TICKET SET status = 'CLOSE' WHERE ticket_id = #{ticketId}")
     void closeTicket(int ticketId);
+
+    /**
+     * 查看指定 userId 的工单
+     */
+    @Select("SELECT * FROM TICKET WHERE user_id = #{userId}")
+    List<Map<String, Object>> selectTicketByUserId(int userId);
+
+    /**
+     * 查看指定 ticketId 的工单
+     */
+    @Select("SELECT * FROM TICKET WHERE ticket_id = #{ticketId}")
+    Map<String, Object> selectTicketByTicketId(int ticketId);
+
+    /**
+     * 查看指定 ticketId 的工单回复列表
+     */
+    @Select("SELECT * FROM TICKET_CONTENT WHERE ticket_id = #{ticketId}")
+    List<Map<String, Object>> selectTicketContentByTicketId(int ticketId);
 
 }
