@@ -1,11 +1,11 @@
 package com.example.studentoutcomebackend.entity.vo;
 
 
-public class ResponseVO<T> {
+public class ResponseVO {
 
     private Integer code;
     private String msg;
-    private T data;
+    private Object data;
 
 
     public Integer getCode() {
@@ -16,11 +16,11 @@ public class ResponseVO<T> {
         this.code = code;
     }
 
-    public T getData() {
+    public Object getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(Object data) {
         this.data = data;
     }
 

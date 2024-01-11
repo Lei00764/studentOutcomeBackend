@@ -1,12 +1,11 @@
 package com.example.studentoutcomebackend.controller;
 
 import com.example.studentoutcomebackend.controller.base.BaseController;
-import com.example.studentoutcomebackend.controller.base.GlobalExceptionHandlerController;
+import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
 import com.example.studentoutcomebackend.entity.vo.ResponseVO;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.service.CompetitionService;
 import com.example.studentoutcomebackend.service.PermissionService;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -249,9 +249,11 @@ public class CompetitionController extends BaseController {
 
             // 检查队伍是否存在
             competitionService.checkTeamExist(teamId);
+            competitionService.throwIfNotInTeam(teamId);
 
             // 如果info不是null，则修改info
             Map<String, Object> newInfo = (Map<String, Object>) requestMap.get("info");
+            List<Map<String, Object>> newStudents = (List<Map<String, Object>>) requestMap.get("teammates");
             if(newInfo != null)
                 competitionService.editTeamBasicInfo(teamId,
                         (Integer) newInfo.get("competition_id"),
@@ -259,6 +261,14 @@ public class CompetitionController extends BaseController {
                         (Integer) newInfo.get("prize_id"),
                         (String) newInfo.get("award_date"),
                         (String) newInfo.get("desc"));
+
+            if(newStudents != null){
+                LinkedList<CompetitionEditingStudent> newStuObj = new LinkedList<>();
+                for(Map<String, Object> s: newStudents){
+                    newStuObj.add(new CompetitionEditingStudent((Integer) s.get("user_id"), (Integer) s.get("order")));
+                }
+                competitionService.editTeamStudents(teamId, newStuObj);
+            }
 
             return getSuccessResponseVO(null);
         } catch (ClassCastException e) {
@@ -271,7 +281,8 @@ public class CompetitionController extends BaseController {
         permissionService.throwIfDontHave("student.competition.edit", null);
 
         try {
-            int teamId = (int) requestMap.get("team_id");
+            Integer teamId = (Integer) requestMap.get("team_id");
+            competitionService.throwIfNotInTeam(teamId);
 
             String code = competitionService.createInvitationCode(teamId);
             Map<String, Object> resMap = new HashMap<>();
@@ -290,6 +301,41 @@ public class CompetitionController extends BaseController {
 
             competitionService.invitationCode(code);
 
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("leaveTeam")
+    public ResponseVO leaveTeam(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("student.competition.edit", null);
+
+        try {
+            Integer teamId = (Integer) requestMap.get("team_id");
+            if(teamId == null)
+                throw new BusinessException(601, "请求参数错误");
+
+            competitionService.throwIfNotInTeam(teamId);
+            competitionService.leaveTeam(teamId);
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("setVerification")
+    public ResponseVO setVerification(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("student.competition.edit", null);
+
+        try {
+            Integer teamId = (Integer) requestMap.get("team_id");
+            Integer verified = (Integer) requestMap.get("verified");
+            if(teamId == null || verified == null)
+                throw new BusinessException(601, "请求参数错误");
+
+            competitionService.throwIfNotInTeam(teamId);
+            competitionService.setStudentVerified(teamId, verified);
             return getSuccessResponseVO();
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");

@@ -4,6 +4,7 @@ import com.example.studentoutcomebackend.adapter.image.AlistImpl;
 import com.example.studentoutcomebackend.adapter.image.ImageService;
 import com.example.studentoutcomebackend.entity.Competition.*;
 import com.example.studentoutcomebackend.entity.StudentInfo;
+import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.service.CompetitionService;
@@ -19,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -150,6 +148,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public Map<String, Object> selectTeamInfoByTeamId(int teamId) {
+        throwIfNotInTeam(teamId);
         CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
 
         if (teamInfo == null) {
@@ -185,6 +184,14 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         prizeInfo.put("id", teamInfo.getPrize().getId());
         prizeInfo.put("name", teamInfo.getPrize().getPrize_name());
+
+        List<CompetitionOperationLog> logs = teamInfo.getLogs();
+        for(CompetitionOperationLog log: logs){
+            Map<String, Object> l = new HashMap<>();
+            l.put("time", log.getOperation_time());
+            l.put("msg", log.getOperation_text());
+            logsInfo.add(l);
+        }
 
         result.put("competition", competitionInfo);
         result.put("term", termInfo);
@@ -254,7 +261,8 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public void submitToReview(int teamId) {
-        competitionMapper.updateTeamStatus(teamId, 1);
+        CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        teamInfo.submitToReview();
     }
 
     /**
@@ -263,7 +271,8 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public void withdrawTeam(int teamId) {
-        competitionMapper.updateTeamStatus(teamId, 0);
+        CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        teamInfo.withdraw();
     }
 
     /**
@@ -275,22 +284,9 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public String uploadCertification(MultipartFile imageFile, int teamId) {
-        ImageService imageService = AlistImpl.get();
-        String oldImageName = competitionMapper.selectTeamImage(teamId);
-        String imageName;
-
-        // 之前有图片了就删除
-        if (oldImageName != null && !oldImageName.equals(""))
-            imageService.removeImage(oldImageName);
-
-        if (imageFile == null) {
-            imageName = null;
-            competitionMapper.updateTeamImage(teamId, null);
-        } else {
-            imageName = imageService.saveImage(imageFile);
-            competitionMapper.updateTeamImage(teamId, imageName);
-        }
-        return imageName;
+        throwIfNotInTeam(teamId);
+        CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        return teamInfo.editCertification(imageFile);
     }
 
     @Override
@@ -302,6 +298,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     public void editTeamBasicInfo(int teamId, int newCompetitionId, int newTermId, int newPrizeId, String newAwardDate, String newDesc) {
+        throwIfNotInTeam(teamId);
         CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
         teamInfo.editBasicInfo(newCompetitionId, newTermId, newPrizeId, newAwardDate, newDesc);
 
@@ -310,9 +307,8 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     public String createInvitationCode(int teamId) {
         // 先检查当前用户能不能修改
-        Object ans = competitionMapper.select1IfUserInTeam(studentInfoService.getCurrentUserInfo().getUser_id(), teamId);
-        if (ans == null)
-            permissionService.throwIfDontHave("teacher.competition.record.edit", "您不属于该竞赛队伍");
+        throwIfNotInTeam(teamId);
+
         String code = SM3Util.getRandomString();
         String teamIdStr = String.valueOf(teamId);
         // 先删除旧的
@@ -344,6 +340,24 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         team.addMember(studentInfoService.getCurrentUserInfo());
 
+    }
+
+    @Override
+    public void editTeamStudents(int teamId, LinkedList<CompetitionEditingStudent> newStuObj) {
+        CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+        team.editContributionOrder(newStuObj);
+    }
+
+    @Override
+    public void leaveTeam(int teamId){
+        CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+        team.removeMember(studentInfoService.getCurrentUserInfo());
+    }
+
+    @Override
+    public void setStudentVerified(int teamId, int verified) {
+        CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+        team.setStudentVerified(studentInfoService.getCurrentUserInfo().getUser_id(), verified);
     }
 
 

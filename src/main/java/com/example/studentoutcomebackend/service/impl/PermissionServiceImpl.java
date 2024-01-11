@@ -41,7 +41,7 @@ public class PermissionServiceImpl implements PermissionService {
         StudentInfo completeStudent = (StudentInfo) session.getAttribute("stuInfo");
         if (completeStudent == null) {
             // 没登陆，使用默认权限
-            return checkPermission(-1, permissionName);
+            throw new BusinessException("未登录");
         } else {
             return checkPermission(completeStudent.getUser_id(), permissionName);
         }

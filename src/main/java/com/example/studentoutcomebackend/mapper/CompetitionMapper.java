@@ -169,6 +169,57 @@ public interface CompetitionMapper {
      * @param teamId
      * @param userId
      */
-    @Insert("insert into COMPETITION_TEAM_STUDENT (team_id, user_id, contribution_order, verified) values (#{teamId}, #{userId}, 0, false)")
-    void insertCompetitionTeamStudent(int teamId, int userId);
+    @Insert("insert into COMPETITION_TEAM_STUDENT (team_id, user_id, contribution_order, verified) values (#{teamId}, #{userId}, #{order}, false)")
+    void insertCompetitionTeamStudent(int teamId, int userId, int order);
+
+    /**
+     * 更新队伍中一名队员贡献
+     */
+    @Update("update COMPETITION_TEAM_STUDENT " +
+            "set contribution_order=#{order}, verified=#{verified} " +
+            "where team_id=#{teamId} and user_id=#{userId}")
+    void updateCompetitionTeamStudent(int teamId, int userId, int order, boolean verified);
+
+    /**
+     * 把一位队员从队伍中移除
+     * @param teamId
+     * @param userId
+     */
+    @Delete("delete from COMPETITION_TEAM_STUDENT where team_id=#{teamId} and user_id=#{userId}")
+    void deleteCompetitionTeamStudent(int teamId, int userId);
+
+    /**
+     * 设置学生的确认状态
+     * @param teamId
+     * @param userId
+     * @param verified
+     */
+    @Update("update COMPETITION_TEAM_STUDENT " +
+            "set verified=#{verified} " +
+            "where team_id=#{teamId} and user_id=#{userId}")
+    void updateStudentVerified(int teamId, int userId, int verified);
+
+    /**
+     * 删除一个竞赛队伍
+     * @param teamId
+     */
+    @Delete("delete from COMPETITION_TEAM where id=#{teamId}")
+    void deleteCompetitionTeam(int teamId);
+
+    /**
+     * 记录队伍的修改日志
+     * @param teamId
+     * @param str
+     */
+    @Insert("insert into COMPETITION_OPERATION_LOG (team_id, operation_time, operation_text, operation_level) values" +
+            "(#{teamId}, #{time}, #{str}, 0)")
+    void insertCompetitionTeamLog(int teamId, String str, String time);
+
+    /**
+     * 获取队伍的修改日志
+     * @param teamId
+     * @return
+     */
+    @Select("select * from COMPETITION_OPERATION_LOG where team_id = #{teamId}")
+    List<CompetitionOperationLog> selectCompetitionOperationLogByTeamId(int teamId);
 }

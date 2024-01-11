@@ -1,9 +1,11 @@
 package com.example.studentoutcomebackend.service;
 
+import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -102,4 +104,14 @@ public interface CompetitionService {
      * @param code
      */
     void invitationCode(String code);
+
+    void editTeamStudents(int teamId, LinkedList<CompetitionEditingStudent> newStuObj);
+
+    /**
+     * 学生自己退出队伍
+     * @param teamId
+     */
+    void leaveTeam(int teamId);
+
+    void setStudentVerified(int teamId, int verified);
 }

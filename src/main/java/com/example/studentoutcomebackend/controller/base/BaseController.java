@@ -6,8 +6,8 @@ import com.example.studentoutcomebackend.exception.BusinessException;
 
 public class BaseController {
 
-    protected <T> ResponseVO getSuccessResponseVO(T t) {
-        ResponseVO<T> responseVO = new ResponseVO<>();
+    protected ResponseVO getSuccessResponseVO(Object t) {
+        ResponseVO responseVO = new ResponseVO();
         responseVO.setCode(ResponseCodeEnum.CODE_200.getCode());
         responseVO.setMsg(ResponseCodeEnum.CODE_200.getMsg());
         responseVO.setData(t);

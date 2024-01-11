@@ -4,6 +4,7 @@ import com.example.studentoutcomebackend.entity.Competition.Competition;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.mapper.StudentInfoMapper;
+import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.utils.SM3Util;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -15,12 +16,16 @@ import org.springframework.stereotype.Component;
 public class StudentInfo {
     @Autowired
     private StudentInfoMapper studentInfoMapper;
+    @Autowired
+    private PermissionService permissionService;
+
     private static StudentInfo me;
 
     @PostConstruct
     private void init() {
         me = this;
         me.studentInfoMapper = this.studentInfoMapper;
+        me.permissionService = this.permissionService;
     }
 
     private int user_id;
@@ -56,6 +61,14 @@ public class StudentInfo {
         String hashPwd = SM3Util.hashPassword(password, this);
         if (!getUser_password().equals(hashPwd))
             throw new BusinessException(601, "账号或密码错误");
+    }
+
+    public int getMenuGroupId(){
+        if(me.permissionService.checkPermission(user_id, "menu.student"))
+            return 2;
+        else if(me.permissionService.checkPermission(user_id, "menu.teacher"))
+            return 3;
+        return 1;
     }
 
 }

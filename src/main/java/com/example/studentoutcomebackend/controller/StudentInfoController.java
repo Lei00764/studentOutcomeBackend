@@ -48,6 +48,7 @@ public class StudentInfoController extends BaseController {
         resObj.put("grade", studentInfo.getGrade());
         // 先放在这，有需求再改~
         resObj.put("avatar_url", "/webstatic/defaultAvatar.png");
+        resObj.put("group_id", studentInfo.getMenuGroupId());
         return getSuccessResponseVO(resObj);
     }
 
