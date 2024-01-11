@@ -48,4 +48,9 @@ public interface NoticeService {
 
     Map<String, Object> selectNoticeByNoticeId(int noticeId);
 
+    /**
+     * 清空系统消息
+     */
+    void clearPersonalNotice();
+
 }

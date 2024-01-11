@@ -26,9 +26,8 @@ public interface NoticeMapper {
     /**
      * 发布系统通知
      */
-    @Select("insert into NOTICE (type, content, send_time, is_read, related_link) values ('system', '系统通知', #{sendTime}, false, #{relatedLink})")
+    @Select("insert into NOTICE (type, content, send_time, is_read, related_link) values ('system', #{content}, #{sendTime}, false, #{relatedLink})")
     void createSystemNotice(String content, String sendTime, String relatedLink);
-
 
     /**
      * 获取个人通知，指定 userId
@@ -53,5 +52,5 @@ public interface NoticeMapper {
      */
     @Select("select * from NOTICE where notice_id = #{noticeId}")
     Map<String, Object> selectNoticeByNoticeId(int noticeId);
-    
+
 }

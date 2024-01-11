@@ -109,4 +109,10 @@ public class NoticeController extends BaseController {
         }
     }
 
+    @RequestMapping("/clearPersonalNotice")
+    public ResponseVO clearPersonalNotice() {
+        noticeService.clearPersonalNotice();
+        return getSuccessResponseVO(null);
+    }
+
 }

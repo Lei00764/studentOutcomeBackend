@@ -60,7 +60,7 @@ public class NoticeServiceImpl implements NoticeService {
         List<Map<String, Object>> personalNoticeList = noticeMapper.selectPersonalNotice(userId);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("personalNotice", personalNoticeList);
+        result.put("noticeList", personalNoticeList);
 
         return result;
     }
@@ -97,6 +97,18 @@ public class NoticeServiceImpl implements NoticeService {
             throw new BusinessException(601, "通知不存在");
         }
         return notice;
+    }
+
+    @Override
+    public void clearPersonalNotice() {
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+
+        List<Map<String, Object>> personalNoticeList = noticeMapper.selectPersonalNotice(userId);
+        for (Map<String, Object> notice : personalNoticeList) {
+            int noticeId = (int) notice.get("notice_id");
+            noticeMapper.updateNoticeReadStatus(noticeId);
+        }
     }
 
 }
