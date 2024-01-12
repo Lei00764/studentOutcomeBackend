@@ -3,6 +3,7 @@ package com.example.studentoutcomebackend.controller;
 import com.example.studentoutcomebackend.controller.base.BaseController;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.exception.BusinessException;
+import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.service.StudentInfoService;
 import com.example.studentoutcomebackend.entity.vo.ResponseVO;
 import com.example.studentoutcomebackend.service.impl.StudentInfoServiceImpl;
@@ -23,6 +24,8 @@ public class StudentInfoController extends BaseController {
 
     @Autowired
     private StudentInfoService studentInfoService;
+    @Autowired
+    private PermissionService permissionService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseVO login(@RequestBody Map<String, Object> requestMap) {
@@ -85,4 +88,22 @@ public class StudentInfoController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "/select", method = RequestMethod.POST)
+    public ResponseVO selectStudent(@RequestBody Map<String, Object> requestMap) {
+        permissionService.throwIfDontHave("teacher.editStudent.queryStudent", null);
+        try {
+            String fieldName = (String) requestMap.get("field");
+            String keyword = (String) requestMap.get("keyword");
+            boolean isPrecise = (Boolean) requestMap.get("precise");
+            int pageNo = (int) requestMap.get("page");
+            Map<String, Object> resMap = new HashMap<>();
+            Map<String, Object> students = studentInfoService.selectStudentByCriteria(keyword, fieldName, isPrecise, pageNo);
+            resMap.put("count", students.get("totalCount"));
+            resMap.put("students", students.get("students"));
+
+            return getSuccessResponseVO(resMap);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
 }

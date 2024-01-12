@@ -19,4 +19,7 @@ public interface StudentInfoService {
 
     Map<String, Object> getStudentInfo(int userId);
 
+    Map<String, Object> selectStudentByCriteria(String keyword, String fieldName, boolean isPrecise, int pageNo);
+
+    StudentInfo selectUserByUserId(int userId);
 }

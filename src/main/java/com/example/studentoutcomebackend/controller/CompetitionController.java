@@ -1,7 +1,9 @@
 package com.example.studentoutcomebackend.controller;
 
 import com.example.studentoutcomebackend.controller.base.BaseController;
+import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
+import com.example.studentoutcomebackend.entity.vo.QueryField;
 import com.example.studentoutcomebackend.entity.vo.ResponseVO;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.service.CompetitionService;
@@ -15,10 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("api/competition")
@@ -146,10 +145,10 @@ public class CompetitionController extends BaseController {
         try {
             String fieldName = (String) requestMap.get("field");
             String keyword = (String) requestMap.get("keyword");
-            boolean prizeId = (Boolean) requestMap.get("precise");
+            boolean isPrecise = (Boolean) requestMap.get("precise");
             int pageNo = (int) requestMap.get("page");
             Map<String, Object> resMap = new HashMap<>();
-            Map<String, Object> teams = competitionService.selectTeamByCriteria(keyword, fieldName, prizeId, pageNo);
+            Map<String, Object> teams = competitionService.selectTeamByCriteria(keyword, fieldName, isPrecise, pageNo);
             resMap.put("count", teams.get("totalCount"));
             resMap.put("teams", teams.get("teams"));
             return getSuccessResponseVO(resMap);
@@ -336,6 +335,99 @@ public class CompetitionController extends BaseController {
 
             competitionService.throwIfNotInTeam(teamId);
             competitionService.setStudentVerified(teamId, verified);
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("check/getTeam")
+    public ResponseVO getTeamByCriteria(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("teacher.competition.check", null);
+        try {
+            List<Map<String, Object>> queryFields = (List<Map<String, Object>>) requestMap.get("fields");
+            Integer userId = (Integer) requestMap.get("user_id");
+            Integer pageNo = (Integer) requestMap.get("page");
+            if(pageNo == null || (queryFields == null && userId == null))
+                throw new BusinessException(601, "请求参数错误");
+
+            if(queryFields != null){
+                ArrayList<QueryField> fields = new ArrayList<>();
+                // 合法性检查
+                for(Map<String, Object> field : queryFields){
+                    if(!field.containsKey("field") || !field.containsKey("keyword")){
+                        throw new BusinessException(601, "参数错误");
+                    }
+                    String fieldName = (String) field.get("field");
+                    if (!fieldName.equals("verify_status") && !fieldName.equals("competition_name") && !fieldName.equals("id")
+                            && !fieldName.equals("term_name") && !fieldName.equals("prize_name")) {
+                        throw new BusinessException(601, "参数错误");
+                    }
+                    if(fieldName.equals("id"))
+                        field.put("precise", true);
+                    else if(fieldName.equals("verify_status"))
+                        field.put("precise", true);
+
+                    fields.add(new QueryField(field.get("field").toString(), field.get("keyword").toString(), field.containsKey("precise") ? ((boolean) field.get("precise") ? 1: 0) : 1));
+                }
+
+                var ans = competitionService.selectTeamByCriteriaTeacher(fields, pageNo);
+
+                return getSuccessResponseVO(ans);
+            }else{
+                var ans = competitionService.selectTeamByStudentTeacher(userId, pageNo);
+                return getSuccessResponseVO(ans);
+            }
+
+
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("check/addStudentToTeam")
+    public ResponseVO addStudentToTeam(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("teacher.competition.check", null);
+        try {
+            Integer teamId = (Integer) requestMap.get("team_id");
+            Integer userId = (Integer) requestMap.get("user_id");
+            if(teamId == null || userId == null)
+                throw new BusinessException(601, "请求参数错误");
+
+            competitionService.addStudentToTeam(teamId, userId);
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("check/removeStudentFromTeam")
+    public ResponseVO removeStudentFromTeam(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("teacher.competition.check", null);
+        try {
+            Integer teamId = (Integer) requestMap.get("team_id");
+            Integer userId = (Integer) requestMap.get("user_id");
+            if(teamId == null || userId == null)
+                throw new BusinessException(601, "请求参数错误");
+
+            competitionService.removeStudentFromTeam(teamId, userId);
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping("check/changeVerifyStatus")
+    public ResponseVO changeVerifyStatus(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("teacher.competition.check", null);
+        try {
+            Integer teamId = (Integer) requestMap.get("team_id");
+            Integer status = (Integer) requestMap.get("status");
+            String msg = (String) requestMap.get("msg");
+            if(teamId == null || status == null || msg == null)
+                throw new BusinessException(601, "请求参数错误");
+
+            competitionService.changeVerifyStatus(teamId, status, msg);
             return getSuccessResponseVO();
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");

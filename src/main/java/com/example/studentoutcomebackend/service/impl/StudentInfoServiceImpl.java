@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -103,4 +104,44 @@ public class StudentInfoServiceImpl implements StudentInfoService {
         resObj.put("StudentInfo", studentInfo);
         return resObj;
     }
+    @Override
+    public Map<String, Object> selectStudentByCriteria(String keyword, String field, boolean isPrecise, int pageNo) {
+        if (!field.equals("") && !field.equals("user_id") && !field.equals("stu_name") && !field.equals("stu_id")) {
+            throw new BusinessException(601, "参数错误");
+        }
+
+        Map<String, Object> callParams = new HashMap<>();
+        callParams.put("keyword", keyword);
+        callParams.put("fieldName", field);
+        callParams.put("precise", isPrecise ? 1 : 0);
+        callParams.put("pageNo", pageNo);
+        callParams.put("totalCount", -1);
+
+        var students = studentInfoMapper.searchStudent(callParams);
+
+        Map<String, Object> ans = new HashMap<>();
+
+        ArrayList<Map<String, Object>> studentJson = new ArrayList<>();
+        for(StudentInfo studentInfo : students){
+            HashMap<String, Object> nowStudentJson = new HashMap<>();
+            nowStudentJson.put("user_id", studentInfo.getUser_id());
+            nowStudentJson.put("stu_id", studentInfo.getStu_id());
+            nowStudentJson.put("stu_name", studentInfo.getStu_name());
+            nowStudentJson.put("grade", studentInfo.getGrade());
+            studentJson.add(nowStudentJson);
+        }
+
+        ans.put("students", studentJson);
+        ans.put("totalCount", callParams.get("totalCount"));
+        return ans;
+    }
+
+    @Override
+    public StudentInfo selectUserByUserId(int userId) {
+        StudentInfo studentInfo = studentInfoMapper.selectUserByUserId(userId);
+        if(studentInfo == null)
+            throw new BusinessException("用户不存在");
+        return studentInfo;
+    }
+
 }

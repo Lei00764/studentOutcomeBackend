@@ -5,6 +5,10 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.mapping.StatementType;
+
+import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface StudentInfoMapper {
@@ -36,4 +40,12 @@ public interface StudentInfoMapper {
     @Select("SELECT * FROM STUDENT_INFO WHERE user_id=#{userId}")
     StudentInfo selectUserByUserId(int userId);
 
+    @Select("{call SelectStudent(" +
+            "#{keyword,jdbcType=VARCHAR,mode=IN}," +
+            "#{fieldName,jdbcType=VARCHAR,mode=IN}," +
+            "#{precise,jdbcType=INTEGER,mode=IN}," +
+            "#{pageNo,jdbcType=VARCHAR,mode=IN}," +
+            "#{totalCount,jdbcType=INTEGER,mode=OUT})}")
+    @Options(statementType = StatementType.CALLABLE)
+    List<StudentInfo> searchStudent(Map<String, Object> params);
 }

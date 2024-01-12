@@ -6,7 +6,6 @@ import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
-import com.example.studentoutcomebackend.mapper.StudentInfoMapper;
 import com.example.studentoutcomebackend.service.CompetitionService;
 import com.example.studentoutcomebackend.service.StudentInfoService;
 import jakarta.annotation.PostConstruct;
@@ -41,8 +40,6 @@ public class CompetitionTeam {
     @Autowired
     private CompetitionService competitionService;
     @Autowired
-    private StudentInfoMapper studentInfoMapper;
-    @Autowired
     private StudentInfoService studentInfoService;
 
     private static CompetitionTeam me;
@@ -53,12 +50,13 @@ public class CompetitionTeam {
     private List<CompetitionTeamStudent> cachedCompetitionTeamStudentList = null;
     private CompetitionTeamLogger logger;
 
+    private boolean canForceEdit = false;
+
     @PostConstruct
     private void init() {
         me = this;
         me.competitionMapper = this.competitionMapper;
         me.competitionService = this.competitionService;
-        me.studentInfoMapper = this.studentInfoMapper;
         me.studentInfoService = this.studentInfoService;
     }
 
@@ -207,7 +205,7 @@ public class CompetitionTeam {
         canEditOrThrow();
         me.competitionMapper.updateStudentVerified(id, userId, verified);
 
-        getLogger().logVerified(me.studentInfoMapper.selectUserByUserId(userId), verified);
+        getLogger().logVerified(me.studentInfoService.selectUserByUserId(userId), verified);
     }
 
     @Transactional
@@ -253,9 +251,14 @@ public class CompetitionTeam {
     }
 
     public void canEditOrThrow(){
-        if(verify_status == 0 || verify_status == 3)
+        if(verify_status == 0 || verify_status == 3 || canForceEdit)
             return;
         throw new BusinessException("当前状态不可编辑！");
+    }
+
+    public void setForceEdit(boolean canForceEdit){
+        this.canForceEdit = canForceEdit;
+        getLogger().setForceEdit(canForceEdit);
     }
 
     /**
@@ -291,7 +294,7 @@ public class CompetitionTeam {
 
     private CompetitionTeamLogger getLogger(){
         if(logger == null)
-            logger = new CompetitionTeamLogger(this, me.competitionMapper, me.studentInfoMapper);
+            logger = new CompetitionTeamLogger(this, me.competitionMapper, me.studentInfoService);
         return logger;
     }
 
@@ -299,4 +302,8 @@ public class CompetitionTeam {
         return me.competitionMapper.selectCompetitionOperationLogByTeamId(id);
     }
 
+    public void setVerifyStatus(int status, String msg) {
+        me.competitionMapper.setTeamStatus(id, status);
+        logger.logCheck(status, msg);
+    }
 }

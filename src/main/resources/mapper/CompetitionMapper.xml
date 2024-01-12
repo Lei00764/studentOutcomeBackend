@@ -12,4 +12,64 @@
         WHERE c.competition_name LIKE CONCAT('%', #{keyword}, '%')
     </select>
 
+    <!-- 不包含姓名学号的查询 -->
+    <select id="selectTeamByCriteriaTeacher" resultType="com.example.studentoutcomebackend.entity.Competition.CompetitionTeam">
+        SELECT * FROM COMPETITION_TEAM
+            JOIN COMPETITION ON COMPETITION_TEAM.competition_id = COMPETITION.id
+            JOIN COMPETITION_TERM ON COMPETITION_TEAM.term_id = COMPETITION_TERM.id
+            JOIN COMPETITION_PRIZE ON COMPETITION_TEAM.prize_id = COMPETITION_PRIZE.id
+        <where>
+            <choose>
+                <when test="fields != null and fields.size() > 0">
+                    <foreach collection="fields" item="field" separator=" AND ">
+                        <choose>
+                            <when test="field.precise and field.precise == 1">
+                                ${field.field} = #{field.keyword}
+                            </when>
+                            <otherwise>
+                                ${field.field} LIKE CONCAT('%', #{field.keyword}, '%')
+                            </otherwise>
+                        </choose>
+                    </foreach>
+                </when>
+                <otherwise>
+                    <!-- Handle the case when no fields are provided -->
+                    1=1
+                </otherwise>
+            </choose>
+        </where>
+
+        LIMIT 20 OFFSET ${offset}
+
+    </select>
+
+    <select id="selectTeamCountByCriteriaTeacher" resultType="java.lang.Integer">
+        SELECT count(*) FROM COMPETITION_TEAM
+        JOIN COMPETITION ON COMPETITION_TEAM.competition_id = COMPETITION.id
+        JOIN COMPETITION_TERM ON COMPETITION_TEAM.term_id = COMPETITION_TERM.id
+        JOIN COMPETITION_PRIZE ON COMPETITION_TEAM.prize_id = COMPETITION_PRIZE.id
+        <where>
+            <choose>
+                <when test="fields != null and fields.size() > 0">
+                    <foreach collection="fields" item="field" separator=" AND ">
+                        <choose>
+                            <when test="field.precise and field.precise == 1">
+                                ${field.field} = #{field.keyword}
+                            </when>
+                            <otherwise>
+                                ${field.field} LIKE CONCAT('%', #{field.keyword}, '%')
+                            </otherwise>
+                        </choose>
+                    </foreach>
+                </when>
+                <otherwise>
+                    <!-- Handle the case when no fields are provided -->
+                    1=1
+                </otherwise>
+            </choose>
+        </where>
+
+    </select>
+
+
 </mapper>

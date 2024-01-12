@@ -1,6 +1,8 @@
 package com.example.studentoutcomebackend.service;
 
+import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
+import com.example.studentoutcomebackend.entity.vo.QueryField;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -114,4 +116,13 @@ public interface CompetitionService {
     void leaveTeam(int teamId);
 
     void setStudentVerified(int teamId, int verified);
+
+    Map<String, Object> selectTeamByCriteriaTeacher(List<QueryField> field, int pageNo);
+    Map<String, Object> selectTeamByStudentTeacher(int userId, int pageNo);
+
+    void addStudentToTeam(Integer teamId, Integer userId);
+
+    void removeStudentFromTeam(Integer teamId, Integer userId);
+
+    void changeVerifyStatus(int teamId, int status, String msg);
 }

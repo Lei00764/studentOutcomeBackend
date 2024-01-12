@@ -5,6 +5,7 @@ import com.example.studentoutcomebackend.adapter.image.ImageService;
 import com.example.studentoutcomebackend.entity.Competition.*;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
+import com.example.studentoutcomebackend.entity.vo.QueryField;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.service.CompetitionService;
@@ -286,6 +287,9 @@ public class CompetitionServiceImpl implements CompetitionService {
     public String uploadCertification(MultipartFile imageFile, int teamId) {
         throwIfNotInTeam(teamId);
         CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        if(studentInfoService.getCurrentUserInfo().getMenuGroupId() == 3)
+            teamInfo.setForceEdit(true);
+
         return teamInfo.editCertification(imageFile);
     }
 
@@ -300,6 +304,9 @@ public class CompetitionServiceImpl implements CompetitionService {
     public void editTeamBasicInfo(int teamId, int newCompetitionId, int newTermId, int newPrizeId, String newAwardDate, String newDesc) {
         throwIfNotInTeam(teamId);
         CompetitionTeam teamInfo = competitionMapper.selectTeamInfoByTeamId(teamId);
+        if(studentInfoService.getCurrentUserInfo().getMenuGroupId() == 3)
+            teamInfo.setForceEdit(true);
+
         teamInfo.editBasicInfo(newCompetitionId, newTermId, newPrizeId, newAwardDate, newDesc);
 
     }
@@ -345,6 +352,10 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     public void editTeamStudents(int teamId, LinkedList<CompetitionEditingStudent> newStuObj) {
         CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+
+        if(studentInfoService.getCurrentUserInfo().getMenuGroupId() == 3)
+            team.setForceEdit(true);
+
         team.editContributionOrder(newStuObj);
     }
 
@@ -358,6 +369,73 @@ public class CompetitionServiceImpl implements CompetitionService {
     public void setStudentVerified(int teamId, int verified) {
         CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
         team.setStudentVerified(studentInfoService.getCurrentUserInfo().getUser_id(), verified);
+    }
+
+    private Map<String, Object> toTeacherTeamListJson(List<CompetitionTeam> teams, int totalCount){
+        Map<String, Object> ans = new HashMap<>();
+        List<Map<String, Object>> teamsJson = new ArrayList<>();
+        for(CompetitionTeam team: teams){
+            Map<String, Object> nowTeamJson = new HashMap<>();
+            nowTeamJson.put("team_id", team.getId());
+            nowTeamJson.put("competition_name", team.getCompetition().getCompetitionName());
+            nowTeamJson.put("term_name", team.getTerm().getName());
+            nowTeamJson.put("prize_name", team.getPrize().getPrize_name());
+            nowTeamJson.put("status_code", team.getVerifyStatus());
+            ArrayList<Map<String, Object>> nowTeamStudentsJson = new ArrayList<>();
+            List<CompetitionTeamStudent> students = team.getCompetitionTeamStudentList();
+            for(CompetitionTeamStudent student : students){
+                Map<String, Object> nowStudentJson = new HashMap<>();
+                nowStudentJson.put("stu_id", student.getStu_id());
+                nowStudentJson.put("stu_name", student.getStu_name());
+                nowTeamStudentsJson.add(nowStudentJson);
+            }
+            nowTeamJson.put("students", nowTeamStudentsJson);
+            teamsJson.add(nowTeamJson);
+        }
+        ans.put("teams", teamsJson);
+        ans.put("count", totalCount);
+
+        return ans;
+    }
+
+    @Override
+    public Map<String, Object> selectTeamByCriteriaTeacher(List<QueryField> fields, int pageNo) {
+        List<CompetitionTeam> teams = competitionMapper.selectTeamByCriteriaTeacher(fields, (pageNo - 1) * 20);
+        int totalCount = competitionMapper.selectTeamCountByCriteriaTeacher(fields);
+
+        return toTeacherTeamListJson(teams, totalCount);
+    }
+
+    @Override
+    public Map<String, Object> selectTeamByStudentTeacher(int userId, int pageNo) {
+        StudentInfo student = studentInfoService.selectUserByUserId(userId);
+        List<CompetitionTeam> teams = competitionMapper.selectTeamByStudentTeacher(student.getUser_id(), (pageNo - 1) * 20);
+        int totalCount = competitionMapper.selectTeamCountByStudentTeacher(student.getUser_id());
+        return toTeacherTeamListJson(teams, totalCount);
+    }
+
+    @Override
+    public void addStudentToTeam(Integer teamId, Integer userId) {
+        CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+        team.setForceEdit(true);
+
+        team.addMember(studentInfoService.selectUserByUserId(userId));
+    }
+
+    @Override
+    public void removeStudentFromTeam(Integer teamId, Integer userId) {
+        CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+        team.setForceEdit(true);
+
+        team.removeMember(studentInfoService.selectUserByUserId(userId));
+    }
+
+    @Override
+    public void changeVerifyStatus(int teamId, int status, String msg){
+        CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
+        team.setForceEdit(true);
+
+        team.setVerifyStatus(status, msg);
     }
 
 

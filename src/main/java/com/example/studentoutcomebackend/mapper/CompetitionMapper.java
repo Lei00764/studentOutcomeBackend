@@ -1,6 +1,7 @@
 package com.example.studentoutcomebackend.mapper;
 
 import com.example.studentoutcomebackend.entity.Competition.*;
+import com.example.studentoutcomebackend.entity.vo.QueryField;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.StatementType;
 
@@ -222,4 +223,25 @@ public interface CompetitionMapper {
      */
     @Select("select * from COMPETITION_OPERATION_LOG where team_id = #{teamId}")
     List<CompetitionOperationLog> selectCompetitionOperationLogByTeamId(int teamId);
+
+    /**
+     * 老师跟根据条件搜索参赛信息
+     */
+    @MapKey("id")
+    List<CompetitionTeam> selectTeamByCriteriaTeacher(List<QueryField> fields, int offset);
+    @MapKey("id")
+    int selectTeamCountByCriteriaTeacher(List<QueryField> fields);
+
+    @Update("update COMPETITION_TEAM set verify_status=#{status} where id=#{teamId}")
+    void setTeamStatus(int teamId, int status);
+
+    @Select("select * from COMPETITION_TEAM join COMPETITION_TEAM_STUDENT " +
+            "on COMPETITION_TEAM.id = COMPETITION_TEAM_STUDENT.team_id " +
+            "where COMPETITION_TEAM_STUDENT.user_id = #{userId} limit 20 offset #{offset}")
+    List<CompetitionTeam> selectTeamByStudentTeacher(int userId, int offset);
+
+    @Select("select count(*) from COMPETITION_TEAM join COMPETITION_TEAM_STUDENT " +
+            "on COMPETITION_TEAM.id = COMPETITION_TEAM_STUDENT.team_id " +
+            "where COMPETITION_TEAM_STUDENT.user_id = #{userId}")
+    int selectTeamCountByStudentTeacher(int userId);
 }

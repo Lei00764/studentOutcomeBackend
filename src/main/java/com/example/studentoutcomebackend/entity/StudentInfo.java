@@ -38,6 +38,8 @@ public class StudentInfo {
 
     private String grade;
 
+    private int main_group_id;
+
     public void changePassword(String oldPassword, String newPassword){
         // 先匹配原来的密码
         String hashPwdOld = SM3Util.hashPassword(oldPassword, this);
@@ -64,11 +66,7 @@ public class StudentInfo {
     }
 
     public int getMenuGroupId(){
-        if(me.permissionService.checkPermission(user_id, "menu.student"))
-            return 2;
-        else if(me.permissionService.checkPermission(user_id, "menu.teacher"))
-            return 3;
-        return 1;
+        return main_group_id;
     }
 
 }
