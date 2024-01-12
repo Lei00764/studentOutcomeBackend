@@ -7,6 +7,7 @@ import com.example.studentoutcomebackend.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -36,9 +37,7 @@ public class TicketController extends BaseController {
             String ticketType = (String) requestMap.get("ticket_type");
             String title = (String) requestMap.get("title");
             String content = (String) requestMap.get("content");
-
-            ticketService.createTicket(ticketType, title, content);
-
+            ticketService.createTicket(title, ticketType, content);
             return getSuccessResponseVO(null);
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
@@ -120,4 +119,17 @@ public class TicketController extends BaseController {
             throw new BusinessException(601, "请求参数错误");
         }
     }
+
+    /**
+     * 管理员获取所有工单
+     */
+    @RequestMapping(value = "/getAllTicketList", method = RequestMethod.POST)
+    public ResponseVO getAllTicketList() {
+        try {
+            return getSuccessResponseVO(ticketService.getAllTicketList());
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
 }

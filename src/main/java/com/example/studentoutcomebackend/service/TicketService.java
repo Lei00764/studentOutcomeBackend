@@ -61,4 +61,9 @@ public interface TicketService {
      */
     Map<String, Object> getTicketContentList(int ticketId);
 
+    /**
+     * 管理员获取工单列表
+     */
+    Map<String, Object> getAllTicketList();
+
 }

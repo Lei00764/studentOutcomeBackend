@@ -3,6 +3,8 @@ package com.example.studentoutcomebackend.service;
 
 import com.example.studentoutcomebackend.entity.StudentInfo;
 
+import java.util.Map;
+
 public interface StudentInfoService {
 
     void login(String userName, String password);
@@ -14,5 +16,7 @@ public interface StudentInfoService {
     void changeUserPassword(String oldPassword, String newPassword);
 
     boolean userIdExist(int userId);
+
+    Map<String, Object> getStudentInfo(int userId);
 
 }

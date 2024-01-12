@@ -71,4 +71,18 @@ public class StudentInfoController extends BaseController {
         }
     }
 
+    /**
+     * 获取指定 userId 学生信息
+     */
+    @RequestMapping(value = "/getStudentInfo", method = RequestMethod.POST)
+    public ResponseVO getStudentInfo(@RequestBody Map<String, Object> requestMap) {
+        try {
+            int userId = (int) requestMap.get("user_id");
+            Map<String, Object> resObj = studentInfoService.getStudentInfo(userId);
+            return getSuccessResponseVO(resObj);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
 }

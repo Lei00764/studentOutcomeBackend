@@ -67,4 +67,10 @@ public interface TicketMapper {
     @Select("SELECT * FROM TICKET_CONTENT WHERE ticket_id = #{ticketId}")
     List<Map<String, Object>> selectTicketContentByTicketId(int ticketId);
 
+    /**
+     * 获取全部工单列表
+     */
+    @Select("SELECT * FROM TICKET")
+    List<Map<String, Object>> selectAllTicket();
+
 }

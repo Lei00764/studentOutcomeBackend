@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 // @Service 作用：标注业务层组件，表示这是一个业务层组件，是Spring框架中的注解
 @Service
 public class StudentInfoServiceImpl implements StudentInfoService {
@@ -87,4 +90,17 @@ public class StudentInfoServiceImpl implements StudentInfoService {
         return studentInfo != null;
     }
 
+
+    @Override
+    @Transactional
+    public Map<String, Object> getStudentInfo(int userId) {
+        StudentInfo studentInfo = this.studentInfoMapper.selectUserByUserId(userId);
+        if (studentInfo == null) {
+            throw new BusinessException(601, "用户不存在");
+        }
+        Map<String, Object> resObj = new HashMap<>();
+
+        resObj.put("StudentInfo", studentInfo);
+        return resObj;
+    }
 }

@@ -69,12 +69,13 @@ public class TicketServiceImpl implements TicketService {
 
         int userId = studentInfo.getUser_id();
 
-        // 检查权限
-//        boolean isAdmin = permissionService.checkPermission(userId, "admin.reply");
-//
-//        String senderType = isAdmin ? "admin" : "student";
-        // TODO: 根据学号判断是 admin 还是 student
-        String senderType = "admin";
+        String senderType;
+        int groupId = studentInfo.getMenuGroupId();
+        if (groupId == 2) {
+            senderType = "student";
+        } else {
+            senderType = "admin";
+        }
 
         String sendTime = TimeUtil.getCurrentTime();
 
@@ -132,4 +133,17 @@ public class TicketServiceImpl implements TicketService {
         return result;
     }
 
+    /**
+     * 获取工单列表
+     */
+    @Override
+    public Map<String, Object> getAllTicketList() {
+        List<Map<String, Object>> tickets = ticketMapper.selectAllTicket();
+
+        Map<String, Object> result = new java.util.HashMap<>();
+
+        result.put("tickets", tickets);
+
+        return result;
+    }
 }
