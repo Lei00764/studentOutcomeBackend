@@ -9,6 +9,7 @@ import com.example.studentoutcomebackend.entity.vo.QueryField;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.service.CompetitionService;
+import com.example.studentoutcomebackend.service.NoticeService;
 import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.service.StudentInfoService;
 import com.example.studentoutcomebackend.utils.SM3Util;
@@ -35,6 +36,8 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Autowired
     PermissionService permissionService;
+    @Autowired
+    NoticeService noticeService;
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
@@ -419,6 +422,9 @@ public class CompetitionServiceImpl implements CompetitionService {
         CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
         team.setForceEdit(true);
 
+        noticeService.sendPersonalNotice(userId, "管理员" +
+                studentInfoService.getCurrentUserInfo().getStu_name() +"把您加入到队伍"+ teamId + "中，点击查看。", "competition/view/" + teamId);
+
         team.addMember(studentInfoService.selectUserByUserId(userId));
     }
 
@@ -427,6 +433,9 @@ public class CompetitionServiceImpl implements CompetitionService {
         CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
         team.setForceEdit(true);
 
+        noticeService.sendPersonalNotice(userId, "管理员" +
+                studentInfoService.getCurrentUserInfo().getStu_name() +"将您从队伍"+ teamId + "中移出。", null);
+
         team.removeMember(studentInfoService.selectUserByUserId(userId));
     }
 
@@ -434,6 +443,11 @@ public class CompetitionServiceImpl implements CompetitionService {
     public void changeVerifyStatus(int teamId, int status, String msg){
         CompetitionTeam team = competitionMapper.selectTeamInfoByTeamId(teamId);
         team.setForceEdit(true);
+
+        for(CompetitionTeamStudent student : team.getCompetitionTeamStudentList()){
+            noticeService.sendPersonalNotice(student.getUser_id(), "管理员" +
+                    studentInfoService.getCurrentUserInfo().getStu_name() +"将您的队伍审核状态设置为："+ CompetitionTeamLogger.getStatusString(status) + "，点击查看。", "competition/view/" + teamId);
+        }
 
         team.setVerifyStatus(status, msg);
     }

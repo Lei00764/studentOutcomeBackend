@@ -4,6 +4,7 @@ import com.example.studentoutcomebackend.entity.Competition.Competition;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.CompetitionMapper;
 import com.example.studentoutcomebackend.mapper.StudentInfoMapper;
+import com.example.studentoutcomebackend.service.NoticeService;
 import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.utils.SM3Util;
 import jakarta.annotation.PostConstruct;
@@ -18,6 +19,8 @@ public class StudentInfo {
     private StudentInfoMapper studentInfoMapper;
     @Autowired
     private PermissionService permissionService;
+    @Autowired
+    private NoticeService noticeService;
 
     private static StudentInfo me;
 
@@ -26,6 +29,7 @@ public class StudentInfo {
         me = this;
         me.studentInfoMapper = this.studentInfoMapper;
         me.permissionService = this.permissionService;
+        me.noticeService = this.noticeService;
     }
 
     private int user_id;
@@ -50,7 +54,7 @@ public class StudentInfo {
         else if (newPassword.length() < 8)
             throw new BusinessException(603, "新密码太短，至少为8位");
 
-        int a = studentInfoMapper.updateUserPassword(getUser_id(), hashPwdOld, hashPwdNew);
+        int a = studentInfoMapper.updateUserPassword(user_id, hashPwdOld, hashPwdNew);
         if (a <= 0)
             throw new BusinessException(604, "旧密码错误");
     }
@@ -69,4 +73,19 @@ public class StudentInfo {
         return main_group_id;
     }
 
+    public void resetPassword(){
+        String hashPwd = SM3Util.hashPassword(stu_id, this);
+        me.studentInfoMapper.setPassword(user_id, hashPwd);
+    }
+
+    public void edit(String newStuId, String newStuName, String newGrade){
+        me.studentInfoMapper.editStudent(user_id, newStuId, newStuName, newGrade);
+        this.stu_name = newStuName;
+        this.stu_id = newStuId;
+        this.grade = newGrade;
+    }
+
+    public boolean hasUnreadNotification(){
+        return me.noticeService.checkPersonalNotice(user_id);
+    }
 }

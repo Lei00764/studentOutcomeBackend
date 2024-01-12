@@ -48,4 +48,23 @@ public interface StudentInfoMapper {
             "#{totalCount,jdbcType=INTEGER,mode=OUT})}")
     @Options(statementType = StatementType.CALLABLE)
     List<StudentInfo> searchStudent(Map<String, Object> params);
+
+    @Update({
+            "UPDATE STUDENT_INFO",
+            "SET user_password = #{hashPwd}",
+            "WHERE user_id = #{userId}"
+    })
+    void setPassword(int userId, String hashPwd);
+
+
+    @Update("UPDATE STUDENT_INFO set stu_id=#{newStuId}, stu_name=#{newStuName}, grade=#{newGrade} where user_id=#{userId}")
+    void editStudent(int userId, String newStuId, String newStuName, String newGrade);
+
+    @Select("{call CreateStudent(" +
+            "#{stuId,jdbcType=VARCHAR,mode=IN}," +
+            "#{stuName,jdbcType=VARCHAR,mode=IN}," +
+            "#{grade,jdbcType=VARCHAR,mode=IN}," +
+            "#{userId,jdbcType=INTEGER,mode=OUT})}")
+    @Options(statementType = StatementType.CALLABLE)
+    void createStudent(Map<String, Object> params);
 }

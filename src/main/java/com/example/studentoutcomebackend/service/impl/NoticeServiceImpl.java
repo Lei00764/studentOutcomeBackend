@@ -29,8 +29,8 @@ public class NoticeServiceImpl implements NoticeService {
     @Resource
     NoticeMapper noticeMapper;
 
-    @Autowired
-    StudentInfoService studentInfoService;
+    // @Autowired
+    // StudentInfoService studentInfoService;
 
     @Autowired
     PermissionService permissionService;
@@ -53,10 +53,7 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public Map<String, Object> getPersonalNotice() {
-        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
-        int userId = studentInfo.getUser_id();
-
+    public Map<String, Object> getPersonalNotice(int userId) {
         List<Map<String, Object>> personalNoticeList = noticeMapper.selectPersonalNotice(userId);
 
         Map<String, Object> result = new HashMap<>();
@@ -100,15 +97,18 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public void clearPersonalNotice() {
-        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
-        int userId = studentInfo.getUser_id();
+    public void clearPersonalNotice(int userId) {
 
         List<Map<String, Object>> personalNoticeList = noticeMapper.selectPersonalNotice(userId);
         for (Map<String, Object> notice : personalNoticeList) {
             int noticeId = (int) notice.get("notice_id");
             noticeMapper.updateNoticeReadStatus(noticeId);
         }
+    }
+
+    @Override
+    public boolean checkPersonalNotice(int userId) {
+        return noticeMapper.checkPersonalNotice(userId);
     }
 
 }

@@ -3,8 +3,10 @@ package com.example.studentoutcomebackend.service.impl;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.mapper.StudentInfoMapper;
+import com.example.studentoutcomebackend.service.NoticeService;
 import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.service.StudentInfoService;
+import com.example.studentoutcomebackend.utils.SM3Util;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -28,6 +30,8 @@ public class StudentInfoServiceImpl implements StudentInfoService {
 
     @Autowired
     private PermissionService permissionService;
+    @Autowired
+    private NoticeService noticeService;
 
     @Override
     @Transactional
@@ -142,6 +146,39 @@ public class StudentInfoServiceImpl implements StudentInfoService {
         if(studentInfo == null)
             throw new BusinessException("用户不存在");
         return studentInfo;
+    }
+
+    @Override
+    public void resetPassword(int userId) {
+        StudentInfo studentInfo = selectUserByUserId(userId);
+        studentInfo.resetPassword();
+        noticeService.sendPersonalNotice(userId, "管理员重置了你的密码，请及时修改密码！", null);
+    }
+
+    @Override
+    public void editStudent(int userId, String stuId, String stuName, String grade) {
+        StudentInfo studentInfo = selectUserByUserId(userId);
+        studentInfo.edit(stuId, stuName, grade);
+    }
+
+    @Override
+    public void createStudent(String stuId, String stuName, String grade) {
+        StudentInfo studentInfo = studentInfoMapper.selectByStuId(stuId);
+        if(studentInfo != null)
+            throw new BusinessException(666, "学号已存在");
+
+        if(stuId.equals("") || stuName.equals(""))
+            throw new BusinessException(665, "学号或姓名不能为空");
+
+
+        Map<String, Object> callParams = new HashMap<>();
+        callParams.put("stuId", stuId);
+        callParams.put("stuName", stuName);
+        callParams.put("grade", grade);
+        callParams.put("userId", -1);
+        studentInfoMapper.createStudent(callParams);
+        studentInfo = studentInfoMapper.selectByStuId(stuId);
+        studentInfo.resetPassword();
     }
 
 }

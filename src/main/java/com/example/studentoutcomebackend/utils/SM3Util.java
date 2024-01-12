@@ -35,6 +35,10 @@ public class SM3Util {
      */
     public static String hashPassword(String password, StudentInfo studentInfo){
         String salt = String.valueOf(studentInfo.getUser_id());
+        return hashPassword(password, salt);
+    }
+
+    public static String hashPassword(String password, String salt){
         String s = salt + password + salt;
         String ans = SM3Util.getHashString(s);
         return ans;

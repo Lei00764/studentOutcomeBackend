@@ -113,7 +113,7 @@ public class CompetitionTeamLogger {
     }
 
 
-    public void logCheck(int status, String msg) {
+    public static String getStatusString(int status){
         String statusName = switch (status) {
             case 0 -> "草稿";
             case 1 -> "等待审核";
@@ -121,6 +121,11 @@ public class CompetitionTeamLogger {
             case 3 -> "审核不通过";
             default -> String.valueOf(status);
         };
+        return statusName;
+    }
+
+    public void logCheck(int status, String msg) {
+        String statusName = getStatusString(status);
 
         String l = "管理员" + studentInfoService.getCurrentUserInfo().getStu_name() +"设置审核状态为：" + statusName;
         if(msg != null && !msg.equals(""))

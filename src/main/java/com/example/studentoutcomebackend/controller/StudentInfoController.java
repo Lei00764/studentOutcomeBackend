@@ -52,6 +52,7 @@ public class StudentInfoController extends BaseController {
         // 先放在这，有需求再改~
         resObj.put("avatar_url", "/webstatic/defaultAvatar.png");
         resObj.put("group_id", studentInfo.getMenuGroupId());
+        resObj.put("unread_notification", studentInfo.hasUnreadNotification());
         return getSuccessResponseVO(resObj);
     }
 
@@ -102,6 +103,48 @@ public class StudentInfoController extends BaseController {
             resMap.put("students", students.get("students"));
 
             return getSuccessResponseVO(resMap);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping(value = "/resetPassword", method = RequestMethod.POST)
+    public ResponseVO resetPassword(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("teacher.editStudent.resetPassword", null);
+        try {
+            Integer userId = (Integer) requestMap.get("user_id");
+            if(userId == null){
+                throw new BusinessException(601, "请求参数错误");
+            }
+            studentInfoService.resetPassword(userId);
+
+            return getSuccessResponseVO();
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    @RequestMapping(value = "/edit" , method = RequestMethod.POST)
+    public ResponseVO editAndCreate(@RequestBody Map<String, Object> requestMap){
+        permissionService.throwIfDontHave("teacher.editStudent.edit", null);
+        try {
+            Integer userId = (Integer) requestMap.get("user_id");
+            String stuId = (String) requestMap.get("stu_id");
+            String stuName = (String) requestMap.get("stu_name");
+            String grade = (String) requestMap.get("grade");
+            if(userId == null || stuName == null || stuId == null || grade == null){
+                throw new BusinessException(601, "请求参数错误");
+            }
+            if(userId > 1) {
+                studentInfoService.editStudent(userId, stuId, stuName, grade);
+            }else if(userId == -1){
+                studentInfoService.createStudent(stuId, stuName, grade);
+            }else{
+                throw new BusinessException(601, "请求参数错误");
+            }
+
+
+            return getSuccessResponseVO();
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
         }

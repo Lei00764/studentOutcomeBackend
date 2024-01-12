@@ -53,4 +53,6 @@ public interface NoticeMapper {
     @Select("select * from NOTICE where notice_id = #{noticeId}")
     Map<String, Object> selectNoticeByNoticeId(int noticeId);
 
+    @Select("SELECT EXISTS(SELECT 1 from NOTICE WHERE user_id=#{userId} and is_read=false)")
+    boolean checkPersonalNotice(int userId);
 }

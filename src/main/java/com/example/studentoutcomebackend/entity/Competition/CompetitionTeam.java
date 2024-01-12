@@ -304,6 +304,6 @@ public class CompetitionTeam {
 
     public void setVerifyStatus(int status, String msg) {
         me.competitionMapper.setTeamStatus(id, status);
-        logger.logCheck(status, msg);
+        getLogger().logCheck(status, msg);
     }
 }

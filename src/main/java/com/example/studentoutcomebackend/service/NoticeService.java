@@ -27,7 +27,7 @@ public interface NoticeService {
     /**
      * 获取个人通知
      */
-    Map<String, Object> getPersonalNotice();
+    Map<String, Object> getPersonalNotice(int userId);
 
     /**
      * 发送个人通知
@@ -51,6 +51,11 @@ public interface NoticeService {
     /**
      * 清空系统消息
      */
-    void clearPersonalNotice();
+    void clearPersonalNotice(int userId);
 
+    /**
+     * 获得某个用户有无未读的个人信息
+     * @return
+     */
+    boolean checkPersonalNotice(int userId);
 }

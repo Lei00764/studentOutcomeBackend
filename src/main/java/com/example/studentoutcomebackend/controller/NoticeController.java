@@ -1,11 +1,13 @@
 package com.example.studentoutcomebackend.controller;
 
 import com.example.studentoutcomebackend.controller.base.BaseController;
+import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.ResponseVO;
 import com.example.studentoutcomebackend.exception.BusinessException;
 import com.example.studentoutcomebackend.service.CompetitionService;
 import com.example.studentoutcomebackend.service.NoticeService;
 import com.example.studentoutcomebackend.service.PermissionService;
+import com.example.studentoutcomebackend.service.StudentInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +28,9 @@ public class NoticeController extends BaseController {
 
     @Autowired
     private NoticeService noticeService;
+
+    @Autowired
+    private StudentInfoService studentInfoService;
 
     @Autowired
     private PermissionService permissionService;
@@ -70,8 +75,10 @@ public class NoticeController extends BaseController {
      */
     @RequestMapping("/getPersonalNotice")
     public ResponseVO getPersonalNotice() {
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
         try {
-            return getSuccessResponseVO(noticeService.getPersonalNotice());
+
+            return getSuccessResponseVO(noticeService.getPersonalNotice(studentInfo.getUser_id()));
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
         }
@@ -111,7 +118,9 @@ public class NoticeController extends BaseController {
 
     @RequestMapping("/clearPersonalNotice")
     public ResponseVO clearPersonalNotice() {
-        noticeService.clearPersonalNotice();
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+
+        noticeService.clearPersonalNotice(studentInfo.getUser_id());
         return getSuccessResponseVO(null);
     }
 
