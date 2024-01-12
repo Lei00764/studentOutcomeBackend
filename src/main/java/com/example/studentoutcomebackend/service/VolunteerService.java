@@ -28,4 +28,9 @@ public interface VolunteerService {
      */
     Map<String, Object> getVolunteerVerification();
 
+    /**
+     * 改变学生志愿申报信息
+     */
+    void changeVolunteerInfo(int volId, String volName, String volType, String participateTime, int durationDay, int durationHour, String volDetail, String imageId);
+
 }

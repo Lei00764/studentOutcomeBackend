@@ -32,7 +32,7 @@ public class VolunteerServiceImpl implements VolunteerService {
     public Map<String, Object> getVolunteerInfoByUserId() {
         StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
         int userId = studentInfo.getUser_id();
-        
+
         List<Map<String, Object>> volunteerInfo = volunteerMapper.selectVolunteerByUserId(userId);
 
         Map<String, Object> result = new HashMap<>();
@@ -90,6 +90,26 @@ public class VolunteerServiceImpl implements VolunteerService {
         Map<String, Object> result = new HashMap<>();
         result.put("volunteersVerification", volunteersVerification);
         return result;
+    }
+
+    @Override
+    @Transactional
+    public void changeVolunteerInfo(int volId, String volName, String volType, String participateTime, int durationDay, int durationHour, String volDetail, String imageId) {
+        Map<String, Object> volunteerInfo = volunteerMapper.selectVolunteerByVolId(volId);
+        if (volunteerInfo == null) {
+            throw new BusinessException(601, "当前志愿服务不存在");
+        }
+
+        StudentInfo studentInfo = studentInfoService.getCurrentUserInfo();
+        int userId = studentInfo.getUser_id();
+
+        int userInfoId = (int) volunteerInfo.get("user_id");  // 数据库中记录的实际 userId
+
+        if (userInfoId != userId) {
+            throw new BusinessException("userId 和 volId 不对应");
+        }
+
+        volunteerMapper.updateVolunteerByVolId(volId, volName, volType, participateTime, durationDay, durationHour, volDetail, imageId);
     }
 
 }

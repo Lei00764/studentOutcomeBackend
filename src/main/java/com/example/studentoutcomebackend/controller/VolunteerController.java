@@ -22,7 +22,6 @@ public class VolunteerController extends BaseController {
     /**
      * 学生查看填写记录
      *
-     * @param requestMap
      * @return
      */
     @RequestMapping("/selectVolunteerInfo")
@@ -91,6 +90,30 @@ public class VolunteerController extends BaseController {
             Map<String, Object> result = volunteerService.getVolunteerVerification();
 
             return getSuccessResponseVO(result);
+        } catch (ClassCastException e) {
+            throw new BusinessException(601, "请求参数错误");
+        }
+    }
+
+    /**
+     * 修改审核页面
+     */
+    // post
+    @RequestMapping("/changeVolunteerInfo")
+    public ResponseVO changeVolunteerInfo(@RequestBody Map<String, Object> requestMap) {
+        try {
+            int volId = (int) requestMap.get("vol_id");
+            String volName = (String) requestMap.get("vol_name");
+            String volType = (String) requestMap.get("vol_type");
+            String participateTime = (String) requestMap.get("participate_time");
+            int durationDay = (int) requestMap.get("duration_day");
+            int durationHour = (int) requestMap.get("duration_hour");
+            String volDetail = (String) requestMap.get("vol_detail");
+            String imageId = requestMap.containsKey("image_id") ? (String) requestMap.get("image_id") : null;
+
+            volunteerService.changeVolunteerInfo(volId, volName, volType, participateTime, durationDay, durationHour, volDetail, imageId);
+
+            return getSuccessResponseVO(null);
         } catch (ClassCastException e) {
             throw new BusinessException(601, "请求参数错误");
         }

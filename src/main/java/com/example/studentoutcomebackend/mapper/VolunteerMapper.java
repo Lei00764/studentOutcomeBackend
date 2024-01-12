@@ -1,10 +1,7 @@
 package com.example.studentoutcomebackend.mapper;
 
 import com.example.studentoutcomebackend.entity.Volunteer.Volunteer;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 import java.util.Map;
@@ -44,5 +41,13 @@ public interface VolunteerMapper {
      */
     @Select("SELECT * FROM VOLUNTEER WHERE user_id = #{userId} AND verify_status = 0")
     List<Map<String, Object>> selectVolunteersVerification(int userId);
+
+    /**
+     * 更新指定 vol_id 的志愿申报信息
+     */
+    @Update("UPDATE VOLUNTEER SET vol_name = #{volName}, vol_type = #{volType}, participate_time = #{participateTime}, " +
+            "duration_day = #{durationDay}, duration_hour = #{durationHour}, vol_detail = #{volDetail}, image_id = #{imageId} " +
+            "WHERE id = #{volId}")
+    void updateVolunteerByVolId(int volId, String volName, String volType, String participateTime, int durationDay, int durationHour, String volDetail, String imageId);
 
 }
