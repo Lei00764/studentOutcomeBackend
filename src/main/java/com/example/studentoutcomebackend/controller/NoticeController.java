@@ -49,7 +49,7 @@ public class NoticeController extends BaseController {
      */
     @RequestMapping("/sendSystemNotice")
     public ResponseVO sendSystemNotice(@RequestBody Map<String, Object> requestMap) {
-        permissionService.throwIfDontHave("notice.edit", "你没有发布通知的权限！");
+        permissionService.throwIfDontHave("teacher.sendNotice", "你没有发布通知的权限！");
 
         try {
             String content = (String) requestMap.get("content");
@@ -82,7 +82,7 @@ public class NoticeController extends BaseController {
      */
     @RequestMapping("/sendPersonalNotice")
     public ResponseVO sendPersonalNotice(@RequestBody Map<String, Object> requestMap) {
-        permissionService.throwIfDontHave("notice.edit", "你没有发布通知的权限！");
+        permissionService.throwIfDontHave("teacher.sendNotice", "你没有发布通知的权限！");
 
         try {
             int userId = (int) requestMap.get("user_id");  // 发给谁
