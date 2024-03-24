@@ -34,6 +34,17 @@ public interface CompetitionMapper {
     Competition selectCompetitionInfoByCompetitionId(int competitionId);
 
     /**
+     * @Author asahi
+     * @Description 返回 COMPETITION 表所有信息
+     * @Date 下午8:40 2024/3/24
+     * @Param
+     * @return
+     * @return java.util.List<com.example.studentoutcomebackend.entity.Competition.Competition>
+     **/
+    @Select("SELECT * FROM COMPETITION")
+    List<Competition> selectCompetitionInfo();
+
+    /**
      * 在 COMPETITION_PRIZE 表，通过 prizeId 查 prizeInfo
      */
     @Select("SELECT * FROM COMPETITION_PRIZE WHERE id = #{prizeId}")

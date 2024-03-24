@@ -1,7 +1,6 @@
 package com.example.studentoutcomebackend.controller;
 
 import com.example.studentoutcomebackend.controller.base.BaseController;
-import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
 import com.example.studentoutcomebackend.entity.vo.QueryField;
 import com.example.studentoutcomebackend.entity.vo.ResponseVO;
@@ -240,7 +239,7 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("editTeam")
-    public ResponseVO editTeam(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO editTeam(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("student.competition.edit", null);
 
         try {
@@ -253,7 +252,7 @@ public class CompetitionController extends BaseController {
             // 如果info不是null，则修改info
             Map<String, Object> newInfo = (Map<String, Object>) requestMap.get("info");
             List<Map<String, Object>> newStudents = (List<Map<String, Object>>) requestMap.get("teammates");
-            if(newInfo != null)
+            if (newInfo != null)
                 competitionService.editTeamBasicInfo(teamId,
                         (Integer) newInfo.get("competition_id"),
                         (Integer) newInfo.get("term_id"),
@@ -261,9 +260,9 @@ public class CompetitionController extends BaseController {
                         (String) newInfo.get("award_date"),
                         (String) newInfo.get("desc"));
 
-            if(newStudents != null){
+            if (newStudents != null) {
                 LinkedList<CompetitionEditingStudent> newStuObj = new LinkedList<>();
-                for(Map<String, Object> s: newStudents){
+                for (Map<String, Object> s : newStudents) {
                     newStuObj.add(new CompetitionEditingStudent((Integer) s.get("user_id"), (Integer) s.get("order")));
                 }
                 competitionService.editTeamStudents(teamId, newStuObj);
@@ -276,7 +275,7 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("createInvitationCode")
-    public ResponseVO createInvitationCode(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO createInvitationCode(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("student.competition.edit", null);
 
         try {
@@ -294,7 +293,7 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("invitationCode")
-    public ResponseVO invitationCode(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO invitationCode(@RequestBody Map<String, Object> requestMap) {
         try {
             String code = (String) requestMap.get("invitation_code");
 
@@ -307,12 +306,12 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("leaveTeam")
-    public ResponseVO leaveTeam(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO leaveTeam(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("student.competition.edit", null);
 
         try {
             Integer teamId = (Integer) requestMap.get("team_id");
-            if(teamId == null)
+            if (teamId == null)
                 throw new BusinessException(601, "请求参数错误");
 
             competitionService.throwIfNotInTeam(teamId);
@@ -324,13 +323,13 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("setVerification")
-    public ResponseVO setVerification(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO setVerification(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("student.competition.edit", null);
 
         try {
             Integer teamId = (Integer) requestMap.get("team_id");
             Integer verified = (Integer) requestMap.get("verified");
-            if(teamId == null || verified == null)
+            if (teamId == null || verified == null)
                 throw new BusinessException(601, "请求参数错误");
 
             competitionService.throwIfNotInTeam(teamId);
@@ -342,20 +341,20 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("check/getTeam")
-    public ResponseVO getTeamByCriteria(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO getTeamByCriteria(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("teacher.competition.check", null);
         try {
             List<Map<String, Object>> queryFields = (List<Map<String, Object>>) requestMap.get("fields");
             Integer userId = (Integer) requestMap.get("user_id");
             Integer pageNo = (Integer) requestMap.get("page");
-            if(pageNo == null || (queryFields == null && userId == null))
+            if (pageNo == null || (queryFields == null && userId == null))
                 throw new BusinessException(601, "请求参数错误");
 
-            if(queryFields != null){
+            if (queryFields != null) {
                 ArrayList<QueryField> fields = new ArrayList<>();
                 // 合法性检查
-                for(Map<String, Object> field : queryFields){
-                    if(!field.containsKey("field") || !field.containsKey("keyword")){
+                for (Map<String, Object> field : queryFields) {
+                    if (!field.containsKey("field") || !field.containsKey("keyword")) {
                         throw new BusinessException(601, "参数错误");
                     }
                     String fieldName = (String) field.get("field");
@@ -363,18 +362,18 @@ public class CompetitionController extends BaseController {
                             && !fieldName.equals("term_name") && !fieldName.equals("prize_name")) {
                         throw new BusinessException(601, "参数错误");
                     }
-                    if(fieldName.equals("id"))
+                    if (fieldName.equals("id"))
                         field.put("precise", true);
-                    else if(fieldName.equals("verify_status"))
+                    else if (fieldName.equals("verify_status"))
                         field.put("precise", true);
 
-                    fields.add(new QueryField(field.get("field").toString(), field.get("keyword").toString(), field.containsKey("precise") ? ((boolean) field.get("precise") ? 1: 0) : 1));
+                    fields.add(new QueryField(field.get("field").toString(), field.get("keyword").toString(), field.containsKey("precise") ? ((boolean) field.get("precise") ? 1 : 0) : 1));
                 }
 
                 var ans = competitionService.selectTeamByCriteriaTeacher(fields, pageNo);
 
                 return getSuccessResponseVO(ans);
-            }else{
+            } else {
                 var ans = competitionService.selectTeamByStudentTeacher(userId, pageNo);
                 return getSuccessResponseVO(ans);
             }
@@ -386,12 +385,12 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("check/addStudentToTeam")
-    public ResponseVO addStudentToTeam(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO addStudentToTeam(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("teacher.competition.check", null);
         try {
             Integer teamId = (Integer) requestMap.get("team_id");
             Integer userId = (Integer) requestMap.get("user_id");
-            if(teamId == null || userId == null)
+            if (teamId == null || userId == null)
                 throw new BusinessException(601, "请求参数错误");
 
             competitionService.addStudentToTeam(teamId, userId);
@@ -402,12 +401,12 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("check/removeStudentFromTeam")
-    public ResponseVO removeStudentFromTeam(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO removeStudentFromTeam(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("teacher.competition.check", null);
         try {
             Integer teamId = (Integer) requestMap.get("team_id");
             Integer userId = (Integer) requestMap.get("user_id");
-            if(teamId == null || userId == null)
+            if (teamId == null || userId == null)
                 throw new BusinessException(601, "请求参数错误");
 
             competitionService.removeStudentFromTeam(teamId, userId);
@@ -418,13 +417,13 @@ public class CompetitionController extends BaseController {
     }
 
     @RequestMapping("check/changeVerifyStatus")
-    public ResponseVO changeVerifyStatus(@RequestBody Map<String, Object> requestMap){
+    public ResponseVO changeVerifyStatus(@RequestBody Map<String, Object> requestMap) {
         permissionService.throwIfDontHave("teacher.competition.check", null);
         try {
             Integer teamId = (Integer) requestMap.get("team_id");
             Integer status = (Integer) requestMap.get("status");
             String msg = (String) requestMap.get("msg");
-            if(teamId == null || status == null || msg == null)
+            if (teamId == null || status == null || msg == null)
                 throw new BusinessException(601, "请求参数错误");
 
             competitionService.changeVerifyStatus(teamId, status, msg);
@@ -433,5 +432,23 @@ public class CompetitionController extends BaseController {
             throw new BusinessException(601, "请求参数错误");
         }
     }
+
+    /**
+     * @Author asahi
+     * @Description 返回竞赛表单
+     * @Date 下午10:52 2024/3/24
+     * @Param
+     * @return
+     * @return com.example.studentoutcomebackend.entity.vo.ResponseVO
+     **/
+//    @GetMapping("/export/competition")
+//    public ResponseVO exportCompetitionInfo(){
+//        try {
+//            MultipartFile file = competitionService.exportAllCompetition();
+//            return getSuccessResponseVO(file);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 }

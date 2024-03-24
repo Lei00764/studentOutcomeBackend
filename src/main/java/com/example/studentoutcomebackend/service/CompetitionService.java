@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -125,4 +126,13 @@ public interface CompetitionService {
     void removeStudentFromTeam(Integer teamId, Integer userId);
 
     void changeVerifyStatus(int teamId, int status, String msg);
+
+    /**
+     * @Author asahi
+     * @Description 导出竞赛列表
+     * @Date 下午9:40 2024/3/24
+     * @Param
+     * @return
+     **/
+    MultipartFile exportAllCompetition() throws IOException;
 }
