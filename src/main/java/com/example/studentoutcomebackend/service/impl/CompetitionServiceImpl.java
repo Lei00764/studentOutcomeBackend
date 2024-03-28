@@ -2,8 +2,6 @@ package com.example.studentoutcomebackend.service.impl;
 
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.ExportParams;
-import com.example.studentoutcomebackend.adapter.image.AlistImpl;
-import com.example.studentoutcomebackend.adapter.image.ImageService;
 import com.example.studentoutcomebackend.entity.Competition.*;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
@@ -14,16 +12,13 @@ import com.example.studentoutcomebackend.service.CompetitionService;
 import com.example.studentoutcomebackend.service.NoticeService;
 import com.example.studentoutcomebackend.service.PermissionService;
 import com.example.studentoutcomebackend.service.StudentInfoService;
-import com.example.studentoutcomebackend.utils.FilePathLocator;
+import com.example.studentoutcomebackend.utils.CompetitionExportForm;
 import com.example.studentoutcomebackend.utils.SM3Util;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericToStringSerializer;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -469,19 +464,18 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     public ByteArrayResource exportAllCompetition() throws IOException {
         // get info from database
-        List<Competition> competitions = competitionMapper.selectCompetitionInfo();
+        List<CompetitionExportForm> competitions = competitionMapper.selectCompetitionInfo();
+        competitions = CompetitionExportForm.process(competitions);
 
         // export by easypoi
         Workbook workbook = ExcelExportUtil.exportExcel(new ExportParams(
                         "竞赛列表",
                         "竞赛sheet"),
-                Competition.class,
+                CompetitionExportForm.class,
                 competitions);
 
         // save & convert
         try {
-//            FilePathLocator locator = new FilePathLocator();
-//            String filePath = locator.getCompetitionLocation();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
             workbook.close();

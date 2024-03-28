@@ -2,6 +2,7 @@ package com.example.studentoutcomebackend.mapper;
 
 import com.example.studentoutcomebackend.entity.Competition.*;
 import com.example.studentoutcomebackend.entity.vo.QueryField;
+import com.example.studentoutcomebackend.utils.CompetitionExportForm;
 import org.apache.ibatis.annotations.*;
 import org.apache.ibatis.mapping.StatementType;
 
@@ -35,14 +36,23 @@ public interface CompetitionMapper {
 
     /**
      * @Author asahi
-     * @Description 返回 COMPETITION 表所有信息
+     * @Description 返回 COMPETITION COMPETITION_LEVEL COMPETITION_PRIZE COMPETITION_TYPE COMPETITION_TERM 表所有信息
      * @Date 下午8:40 2024/3/24
      * @Param
      * @return
      * @return java.util.List<com.example.studentoutcomebackend.entity.Competition.Competition>
      **/
-    @Select("SELECT * FROM COMPETITION")
-    List<Competition> selectCompetitionInfo();
+    @Select("CALL ExportCompetitionForm()")
+    @Results(id = "competitionMap", value = {
+            @Result(property = "competition_name", column = "competition_name"),
+            @Result(property = "level_name", column = "level_name"),
+            @Result(property = "type_name", column = "type_name"),
+            @Result(property = "term_name", column = "term_name"),
+            @Result(property = "prize_name", column = "prize_name"),
+            @Result(property = "prize_order", column = "prize_order"),
+            @Result(property = "organizer", column = "organizer")
+    })
+    List<CompetitionExportForm> selectCompetitionInfo();
 
     /**
      * 在 COMPETITION_PRIZE 表，通过 prizeId 查 prizeInfo
