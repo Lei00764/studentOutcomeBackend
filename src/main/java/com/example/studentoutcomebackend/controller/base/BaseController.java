@@ -3,6 +3,12 @@ package com.example.studentoutcomebackend.controller.base;
 import com.example.studentoutcomebackend.entity.enums.ResponseCodeEnum;
 import com.example.studentoutcomebackend.entity.vo.ResponseVO;
 import com.example.studentoutcomebackend.exception.BusinessException;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+
+import java.io.InputStream;
 
 public class BaseController {
 
@@ -12,6 +18,20 @@ public class BaseController {
         responseVO.setMsg(ResponseCodeEnum.CODE_200.getMsg());
         responseVO.setData(t);
         return responseVO;
+    }
+
+    protected ResponseEntity<Resource> getBinaryResponse(Resource resource, String fileName) {
+        return getBinaryResponse(resource, fileName, 200);
+    }
+
+    protected ResponseEntity<Resource> getBinaryResponse(Resource resource, String fileName, int code) {
+        var ans =  ResponseEntity.ok().header("Code", String.valueOf(code));
+        if(resource == null){
+            return ans.body(null);
+        }
+
+        return ans.header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName).body(resource);
+
     }
 
     protected <T> ResponseVO getSuccessResponseVO() {

@@ -3,11 +3,15 @@ package com.example.studentoutcomebackend.service;
 import com.example.studentoutcomebackend.entity.StudentInfo;
 import com.example.studentoutcomebackend.entity.vo.CompetitionEditingStudent;
 import com.example.studentoutcomebackend.entity.vo.QueryField;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -134,5 +138,5 @@ public interface CompetitionService {
      * @Param
      * @return
      **/
-    MultipartFile exportAllCompetition() throws IOException;
+    ByteArrayResource exportAllCompetition() throws IOException;
 }

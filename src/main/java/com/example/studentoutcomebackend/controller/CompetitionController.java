@@ -10,12 +10,15 @@ import com.example.studentoutcomebackend.service.PermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @RestController
@@ -441,14 +444,14 @@ public class CompetitionController extends BaseController {
      * @return
      * @return com.example.studentoutcomebackend.entity.vo.ResponseVO
      **/
-//    @GetMapping("/export/competition")
-//    public ResponseVO exportCompetitionInfo(){
-//        try {
-//            MultipartFile file = competitionService.exportAllCompetition();
-//            return getSuccessResponseVO(file);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    @RequestMapping(value="/export/competition", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<Resource> exportCompetitionInfo(){
+        try {
+            Resource file = competitionService.exportAllCompetition();
+            return getBinaryResponse(file, "compitition.xlsx");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

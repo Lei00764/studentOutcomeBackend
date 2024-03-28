@@ -20,6 +20,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.mock.web.MockMultipartFile;
@@ -466,7 +467,7 @@ public class CompetitionServiceImpl implements CompetitionService {
      * @return
      **/
     @Override
-    public MultipartFile exportAllCompetition() throws IOException {
+    public ByteArrayResource exportAllCompetition() throws IOException {
         // get info from database
         List<Competition> competitions = competitionMapper.selectCompetitionInfo();
 
@@ -479,15 +480,13 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         // save & convert
         try {
-            FilePathLocator locator = new FilePathLocator();
-            String filePath = locator.getCompetitionLocation();
-            workbook.write(new FileOutputStream(filePath));
+//            FilePathLocator locator = new FilePathLocator();
+//            String filePath = locator.getCompetitionLocation();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
             workbook.close();
 
-            File file = new File(filePath);
-            FileInputStream input = new FileInputStream(file);
-            MultipartFile multipartFile = new MockMultipartFile(file.getName(), file.getName(), null, input);
-            return multipartFile;
+            return new ByteArrayResource(outputStream.toByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
